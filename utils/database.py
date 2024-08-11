@@ -4,6 +4,8 @@
 from os import getenv
 from models.base import BaseClass, Base
 from models.user import User
+from models.post import Post
+from models.tag import Tag
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.session import Session
@@ -12,6 +14,7 @@ from sqlalchemy.orm.session import Session
 class DB:
     """ The Database Class """
     __session = None
+    __classes = [User, Post, Tag]
 
     def __init__(self) -> None:
         """ Initializes the DB """
@@ -47,14 +50,26 @@ class DB:
         """ Closes the current session """
         self._session.remove()
 
-    def all(self) -> dict:
+    def all(self, cls=None) -> dict | list:
         """ Returns a list of objects saved in the database """
+        
         objs = {}
-        result = self._session.query(User)
-        for obj in result:
-            objs[f'{obj.__class__.__name__}/{obj.id}'] = obj
+        if cls:
+            result = self._session.query(cls)
+            for obj in result:
+                objs[f'{obj.__class__.__name__}/{obj.id}'] = obj
 
-        return objs
+            return objs
+        else:
+            all_objs = []
+            for clas in self.__classes:
+                class_objs = {}
+                result = self._session.query(clas)
+                for obj in result:
+                    class_objs[f'{obj.__class__.__name__}/{obj.id}'] = obj
+                all_objs.append(class_objs)
+
+            return all_objs
         
 
 storage = DB()
