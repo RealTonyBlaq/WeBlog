@@ -14,7 +14,7 @@ Base = declarative_base()
 def _hash(password) -> str:
     """ Returns a hashed password """
     salt = gensalt()
-    return hashpw(password, salt)
+    return hashpw(password.encode('utf-8'), salt)
 
 
 class BaseClass:
@@ -27,11 +27,13 @@ class BaseClass:
         """ Initializing the attributes """
         self.id = str(uuid4())
         self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+        self.updated_at = self.created_at
 
-        for key, Value in kwargs.items():
+        for key, value in kwargs.items():
             if key not in ['id', 'created_at', 'updated_at']:
-                setattr(self, key, Value)
+                if key == 'password':
+                    value = _hash(value)
+                setattr(self, key, value)
 
     def info(self) -> dict:
         """ Returns a dictionary of the object attributes """
@@ -44,6 +46,12 @@ class BaseClass:
 
     def save(self):
         """ Saves an object to the database """
-        from utils.database import storage
-        storage.new(self)
-        storage.save(self)
+        from utils.database import DB
+        self.updated_at = datetime.now()
+        DB.add(self)
+        DB.save()
+
+    def delete(self):
+        """ Deletes the object from storage """
+        from utils.database import DB
+        DB.delete(self)
