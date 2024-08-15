@@ -10,3 +10,4 @@ class Tag(BaseClass, Base):
     __tablename__ = 'tags'
     name = Column(String(60), nullable=False, unique=True)
     post_id = Column(String(60), ForeignKey('posts.id'), nullable=False)
+    user_id = Column(String(60), ForeignKey('users.id'))
