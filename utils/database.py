@@ -2,10 +2,11 @@
 """ The Database Model """
 
 from os import getenv
-from models.base import BaseClass, Base
-from models.user import User
+from models.base import Base
+from models.comment import Comment
 from models.post import Post
 from models.tag import Tag
+from models.user import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.session import Session
@@ -16,7 +17,7 @@ from sqlalchemy.exc import NoResultFound, InvalidRequestError
 class Storage:
     """ The Database Class """
     __session = None
-    __classes = [User, Post, Tag]
+    __classes = [User, Post, Tag, Comment]
 
     def __init__(self) -> None:
         """ Initializes the DB """
@@ -27,8 +28,11 @@ class Storage:
 
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
           user, password, host, database))
+        # if getenv('BUILD_TYPE') == 'test':
+        #    Base.metadata.drop_all(bind=self.__engine)
         Base.metadata.create_all(self.__engine)
         self.__session = None
+        self.eng = self.__engine
 
     @property
     def _session(self) -> Session:
@@ -59,7 +63,6 @@ class Storage:
 
     def all(self, cls=None) -> dict | list:
         """ Returns a list of objects saved in the database """
-        
         objs = {}
         if cls:
             result = self._session.query(cls)
@@ -80,7 +83,8 @@ class Storage:
 
     def create_user(self, data: dict) -> User:
         """ Creates & saves a User Object and returns it """
-        for key in ['first_name', 'last_name', 'email', 'password', 'username']:
+        for key in ['first_name', 'last_name',
+                    'email', 'password', 'username']:
             if key not in data:
                 raise TypeError(f'{key} missing')
 
@@ -92,7 +96,8 @@ class Storage:
 
         raise ValueError('User already exists')
 
-    def retrieve_obj_by(self, cls: Union[User, Post, Tag], **kwargs) -> User | None:
+    def retrieve_obj_by(self, cls: Union[User, Post, Tag, Comment],
+                        **kwargs: dict) -> Union[User, Post, Tag, Comment]:
         """
         Retrieves an object from the database
 
@@ -100,10 +105,9 @@ class Storage:
         """
         if kwargs:
             try:
-                user = self._session.query(cls).filter_by(**kwargs).first()
-                return user
-            except (NoResultFound, InvalidRequestError):
-                pass
+                return self._session.query(cls).filter_by(**kwargs).first()
+            except InvalidRequestError as e:
+                print('error =>', e)
         return None
 
     def create_post(self, data: dict) -> Post:
@@ -120,12 +124,44 @@ class Storage:
         user = self.retrieve_obj_by(User, id=user_id)
         if user:
             new_post = Post(**data)
-            new_post.save()
-            user.posts.append(new_post)
+            user.articles.append(new_post)
             user.save()
+            new_post.save()
             return new_post
 
-        raise ValueError(f'User with id {user_id} does not exist')    
+        raise ValueError(f'User with id {user_id} does not exist')
+
+    def create_comment(self, data: dict) -> Comment:
+        """
+        Creates a Comment object and returns it
+
+        data -> A dict with the following keys:
+            post_id: The id of the post where the comment is to be made
+            parent_id: if the comment is a reply to another comment, it
+                        should carry the id of the comment as parent_id
+            content: The comment
+        """
+        post_id = data.get('post_id')
+        content = data.get('content')
+        if not post_id:
+            raise TypeError('post_id missing')
+        if not content:
+            raise TypeError('content missing')
+
+        post = self.retrieve_obj_by(Post, id=post_id)
+        if post:
+            parent_id = data.get('parent_id')
+            if parent_id:
+                parent_comment = self.retrieve_obj_by(Comment, id=parent_id)
+                if not parent_comment:
+                    raise ValueError(f'Parent_id {parent_id} is invalid')
+            comment = Comment(**data)
+            post.comments.append(comment)
+            post.save()
+            comment.save()
+            return comment
+
+        raise ValueError(f'post with id {post_id} is invalid')
 
 
 DB = Storage()
