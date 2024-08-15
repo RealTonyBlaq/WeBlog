@@ -28,8 +28,7 @@ class Storage:
 
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
           user, password, host, database))
-        # if getenv('BUILD_TYPE') == 'test':
-        #    Base.metadata.drop_all(bind=self.__engine)
+
         Base.metadata.create_all(self.__engine)
         self.__session = None
 
