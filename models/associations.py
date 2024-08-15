@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+""" Secondary Tables for Many-to-Many relationship """
+
+from sqlalchemy import Table, Column, String, ForeignKey
+from models.base import Base
+
+
+# Secondary table for User -> Posts (bookmarks)
+# and Post -> User
+user_post = Table(
+    'user_post',
+    Base.metadata,
+    Column('user_id', String(60), ForeignKey('users.id'), primary_key=True),
+    Column('post_id', String(60), ForeignKey('posts.id'), primary_key=True)
+)
