@@ -32,7 +32,6 @@ class Storage:
         #    Base.metadata.drop_all(bind=self.__engine)
         Base.metadata.create_all(self.__engine)
         self.__session = None
-        self.eng = self.__engine
 
     @property
     def _session(self) -> Session:
