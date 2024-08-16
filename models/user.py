@@ -4,7 +4,7 @@
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from models.associations import user_post
+from models.associations import user_post, user_tag
 from models.base import BaseClass, Base
 from models.post import Post
 
@@ -19,9 +19,10 @@ class User(BaseClass, Base):
     password = Column(String(60), nullable=False)
     is_email_verified = Column(Boolean, default=False)
     username = Column(String(25), nullable=False, unique=True)
+    avatar_url = Column(String(100), nullable=True)
     articles = relationship('Post', backref='users',
-                            cascade='all, delete, delete-orphan',
-                            overlaps="likes,posts")
+                            cascade='all, delete, delete-orphan')
     bookmarks = relationship('Post', secondary=user_post,
-                             back_populates='users', overlaps="bookmarked_by")
-    interested_subjects = relationship('Tag', backref='users')
+                             back_populates='bookmarked_by')
+    interested_subjects = relationship('Tag', secondary=user_tag,
+                                       back_populates='authors')
