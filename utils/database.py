@@ -31,6 +31,7 @@ class Storage:
 
         Base.metadata.create_all(self.__engine)
         self.__session = None
+        self.eng = self.__engine
 
     @property
     def _session(self) -> Session:
@@ -80,7 +81,19 @@ class Storage:
             return all_objs
 
     def create_user(self, data: dict) -> User:
-        """ Creates & saves a User Object and returns it """
+        """
+        create_user: Creates and saves a User Object
+
+        data (dict) must have the following keys:
+
+        first_name (str): First name of the User
+        last_name (str): Last name of the User
+        email: (str): User's email
+        password (str): User's password
+        username (str): Preferred username
+
+        Return: The created object
+        """
         for key in ['first_name', 'last_name',
                     'email', 'password', 'username']:
             if key not in data:
@@ -110,7 +123,13 @@ class Storage:
 
     def create_post(self, data: dict) -> Post:
         """
-        Creates a Post if the user_id is valid
+        create_post: Creates a Post if the user_id is valid
+
+        data (dict) must have the following keys:
+
+        title (str): The Post's title
+        body (str): The post content
+        user_id (str): The User's id
 
         Return: The created post
         """
@@ -134,10 +153,12 @@ class Storage:
         Creates a Comment object and returns it
 
         data -> A dict with the following keys:
-            post_id: The id of the post where the comment is to be made
-            parent_id: if the comment is a reply to another comment, it
+            post_id (str): The id of the post where the comment is to be made
+            parent_id (str): if the comment is a reply to another comment, it
                         should carry the id of the comment as parent_id
-            content: The comment
+            content (str): The comment
+
+        Return: The comment
         """
         post_id = data.get('post_id')
         content = data.get('content')
