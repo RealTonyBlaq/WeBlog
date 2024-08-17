@@ -4,7 +4,6 @@ Contains the Base model
 """
 
 from datetime import datetime
-from utils import db
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
@@ -50,6 +49,7 @@ class BaseClass:
 
     def save(self):
         """updates the attribute 'updated_at' with the current datetime"""
+        from utils import db
         self.updated_at = datetime.now()
         db.add(self)
         db.save()
@@ -71,5 +71,6 @@ class BaseClass:
 
     def delete(self):
         """delete the current instance from the storage"""
+        from utils import db
         db.delete(self)
         db.save()

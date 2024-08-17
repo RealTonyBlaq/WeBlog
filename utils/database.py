@@ -8,7 +8,6 @@ from models.comment import Comment
 from models.post import Post
 from models.tag import Tag
 from models.user import User
-from utils import db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy_utils import create_database, database_exists
@@ -100,6 +99,7 @@ class Storage:
         Returns the object based on the class name and its ID, or
         None if not found
         """
+        from utils import db
         if cls not in classes.values():
             return None
 
@@ -114,6 +114,7 @@ class Storage:
         """
         count the number of objects in storage
         """
+        from utils import db
         count = 0
         if not cls:
             for clas in classes.values():

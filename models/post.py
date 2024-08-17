@@ -3,7 +3,6 @@
 
 from models.associations import user_post, post_tag
 from models.base import BaseClass, Base
-from models.tag import Tag
 from sqlalchemy import String, Column, ForeignKey
 from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import relationship

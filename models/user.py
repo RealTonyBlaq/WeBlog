@@ -6,7 +6,6 @@ from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from models.associations import user_post, user_tag
 from models.base import BaseClass, Base
-from models.post import Post
 
 
 class User(BaseClass, Base):
@@ -18,7 +17,7 @@ class User(BaseClass, Base):
     last_login = Column(DateTime, default=datetime.now())
     password = Column(String(60), nullable=False)
     is_email_verified = Column(Boolean, default=False)
-    username = Column(String(25), nullable=False, unique=True)
+    username = Column(String(25), nullable=True, unique=True)
     avatar_url = Column(String(100), nullable=True)
     articles = relationship('Post', backref='users',
                             cascade='all, delete, delete-orphan')
