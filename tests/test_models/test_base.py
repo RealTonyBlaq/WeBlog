@@ -139,4 +139,4 @@ class TestBaseClassMethods(unittest.TestCase):
         with self.assertRaises(UnmappedInstanceError,
                                msg='A BaseClass obj cannot be deleted \
                                    from the database'):
-            base.save()
+            base.delete()
