@@ -26,3 +26,14 @@ class User(BaseClass, Base):
                              back_populates='bookmarked_by')
     interested_subjects = relationship('Tag', secondary=user_tag,
                                        back_populates='authors')
+
+    def __init__(self, **kwargs: dict) -> None:
+        """ Initializes the attributes """
+        for key in ['first_name', 'last_name', 'email',
+                    'password', 'username']:
+            if key not in kwargs:
+                raise ValueError(f'{key} missing')
+            if not isinstance(kwargs.get(key), str):
+                raise TypeError(f'{key} must be a string')
+
+        super().__init__(**kwargs)
