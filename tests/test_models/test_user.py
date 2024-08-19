@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """ Test Suite for the User Model """
 
-from utils.database import DB, Session
+from bcrypt import checkpw
 from datetime import datetime
 import inspect
 from models.user import User
 import models.user
+import pep8 as pycodestyle
 import time
 import unittest
-import pep8 as pycodestyle
-from MySQLdb import IntegrityError
 
 
 module_doc = models.user.__doc__
@@ -119,12 +118,10 @@ class TestUser(unittest.TestCase):
 
     def test_updated_at(self):
         """ Tests the updated_at attribute """
-        self.data['updated_at'] = 'Today'
-
         new_user = User(**self.data)
 
-        self.assertTrue(new_user.updated_at != 'Today',
-                        'updated_at should be auto-generated')
+        self.assertIsNotNone(new_user.updated_at,
+                             'updated_at should be auto-generated')
         self.assertTrue(isinstance(new_user.updated_at, datetime),
                         'updated_at should be a datetime object')
 
@@ -143,6 +140,11 @@ class TestUser(unittest.TestCase):
         self.assertTrue(before != after, 'updated_at should be updated \
             when save() is called')
         new_user2.delete()
+
+        self.data['updated_at'] = 'Today'
+        new_user3 = User(**self.data)
+        self.assertTrue(new_user3.updated_at != 'Today',
+                        'updated_at should be auto-generated')
 
     def test_first_name(self):
         """ Tests the first_name attribute """
@@ -202,4 +204,41 @@ class TestUser(unittest.TestCase):
         # Tests User creation without an email
         del self.data['email']
         with self.assertRaises(ValueError, msg='email is required'):
+            User(**self.data)
+
+    def test_last_login(self):
+        """ Tests the last_login attribute """
+        new_user = User(**self.data)
+        self.assertIsNone(new_user.last_login,
+                          'last_login will be None until the object is saved')
+
+        new_user.save()
+        self.assertTrue(isinstance(new_user.last_login, datetime),
+                        'last_login should be a datetime')
+
+        self.data['last_login'] = 'Today'
+        with self.assertRaises(TypeError,
+                               msg='last_login should be a datetime'):
+            User(**self.data)
+
+        new_user.delete()
+
+    def test_password(self):
+        """ Tests the password attribute """
+        new_user = User(**self.data)
+
+        # check that password is hashed
+        self.assertFalse(new_user.password == self.data['password'],
+                         'password was not hashed')
+        self.assertTrue(checkpw(self.data['password'].encode('utf'),
+                                new_user.password), 'password not hashed')
+
+        # testing User creation without a password
+        del self.data['password']
+        with self.assertRaises(ValueError, msg='password is missing'):
+            User(**self.data)
+
+        # Testing User creation with password as number
+        self.data['password'] = 550
+        with self.assertRaises(TypeError, msg='Password must be a string'):
             User(**self.data)
