@@ -36,4 +36,16 @@ class User(BaseClass, Base):
             if not isinstance(kwargs.get(key), str):
                 raise TypeError(f'{key} must be a string')
 
+        if kwargs.get('last_login') and not isinstance(
+          kwargs.get('last_login'), datetime):
+            raise TypeError('last_login should be a datetime object')
+
+        if kwargs.get('is_email_verified') and not isinstance(
+          kwargs.get('is_email_verified'), bool):
+            raise TypeError('is_email_verified must be a bool')
+
+        if kwargs.get('avatar_url') and not isinstance(
+          kwargs.get('avatar_url'), str):
+            raise TypeError('avatar_url must be a string')
+
         super().__init__(**kwargs)
