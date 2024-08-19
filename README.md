@@ -1,6 +1,17 @@
 # WeBlog - A Modern Blog Platform
 
-## Setup .env file
+## Get Project Up and Running
+### Create and activate virtual environment
+```
+python3 -m venv <virtual-environment-name>
+source <virtual-environment-name>/bin/activate
+```
+
+### Install project dependencies
+```
+pip3 install -r requirements.txt
+```
+
 To be able to run the flask app, create a .env file and add the following
 ```
 export SECRET_KEY=<your_secret_key> # just generate a random string
