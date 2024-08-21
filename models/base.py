@@ -73,4 +73,3 @@ class BaseClass:
         """delete the current instance from the storage"""
         from utils import db
         db.delete(self)
-        db.save()
