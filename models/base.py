@@ -1,57 +1,76 @@
-#!/usr/bin/env python3
-""" Base Model for other models """
+#!/usr/bin/python3
+"""
+Contains the Base model
+"""
 
-from bcrypt import gensalt, hashpw
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, DateTime
-from uuid import uuid4
+from sqlalchemy.ext.declarative import declarative_base
+import uuid
 
+time = "%Y-%m-%dT%H:%M:%S.%f"
 
 Base = declarative_base()
 
 
-def _hash(password) -> str:
-    """ Returns a hashed password """
-    salt = gensalt()
-    return hashpw(password.encode('utf-8'), salt)
-
-
 class BaseClass:
-    """ Defining the Base Model class attributes """
-    id = Column(String(60), nullable=False, primary_key=True)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    """The BaseModel class from which future classes will be derived"""
+    id = Column(String(60), primary_key=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now)
 
-    def __init__(self, **kwargs: dict) -> None:
-        """ Initializing the attributes """
-        self.id = str(uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = self.created_at
+    def __init__(self, *args, **kwargs):
+        """Initialization of the base model"""
+        if kwargs:
+            for key, value in kwargs.items():
+                if key != "__class__":
+                    setattr(self, key, value)
+            if kwargs.get("created_at", None) and type(self.created_at) is str:
+                self.created_at = datetime.strptime(kwargs["created_at"], time)
+            else:
+                self.created_at = datetime.now()
 
-        for key, value in kwargs.items():
-            if key not in ['id', 'created_at', 'updated_at']:
-                if key == 'password':
-                    value = _hash(value)
-                setattr(self, key, value)
+            if kwargs.get("updated_at", None) and type(self.updated_at) is str:
+                self.updated_at = datetime.strptime(kwargs["updated_at"], time)
+            else:
+                self.updated_at = datetime.now()
 
-    def info(self) -> dict:
-        """ Returns a dictionary of the object attributes """
-        obj = {}
-        for key, value in self.__dict__.items():
-            if key not in ['password', '_sa_instance_state']:
-                obj[key] = value
+            if kwargs.get("id", None) is None:
+                self.id = str(uuid.uuid4())
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = self.created_at
 
-        return obj
+    def __str__(self):
+        """String representation of the BaseModel class"""
+        return "[{:s}] ({:s}) {}".format(self.__class__.__name__, self.id,
+                                         self.__dict__)
 
     def save(self):
-        """ Saves an object to the database """
-        from utils.database import DB
+        """updates the attribute 'updated_at' with the current datetime"""
+        from utils import db
         self.updated_at = datetime.now()
-        DB.add(self)
-        DB.save()
+        db.add(self)
+        db.save()
+
+    def to_dict(self, save_fs=None):
+        """returns a dictionary containing all keys/values of the instance"""
+        new_dict = self.__dict__.copy()
+        if "created_at" in new_dict:
+            new_dict["created_at"] = new_dict["created_at"].strftime(time)
+        if "updated_at" in new_dict:
+            new_dict["updated_at"] = new_dict["updated_at"].strftime(time)
+        new_dict["__class__"] = self.__class__.__name__
+        if "_sa_instance_state" in new_dict:
+            del new_dict["_sa_instance_state"]
+        if save_fs is None:
+            if "password" in new_dict:
+                del new_dict["password"]
+        return new_dict
 
     def delete(self):
-        """ Deletes the object from storage """
-        from utils.database import DB
-        DB.delete(self)
+        """delete the current instance from the storage"""
+        from utils import db
+        db.delete(self)
+        db.save()
