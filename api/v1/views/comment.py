@@ -1,5 +1,4 @@
 """Defines the Comment routes"""
-from api.v1.app import executor
 from api.v1.views import app_views
 from flask import jsonify, request
 from flask_login import login_required, current_user
@@ -22,6 +21,7 @@ def comments(post_id, comment_id=None):
     GET - returns all comments for a post
     GET id - returns a comment for a post
     """
+    from api.v1.app import executor
     if request.method == "GET":
         if comment_id:
             # this returns a comment
@@ -70,7 +70,7 @@ def comments(post_id, comment_id=None):
 @app_views.route('/post/<post_id>/comments', methods=['POST'], strict_slashes=False)
 @app_views.route('/post/<post_id>/comments/<comment_id>', methods=['PATCH', 'DELETE'], strict_slashes=False)
 @login_required
-def comments(post_id, comment_id):
+def modify_comments(post_id, comment_id):
     """ creates and modifies a comment """
     user_id = current_user.get_id()
 
