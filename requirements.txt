@@ -18,6 +18,7 @@ dkimpy==1.1.8
 dnspython==2.6.1
 Flask==3.0.3
 Flask-Cors==4.0.1
+Flask-Executor==1.0.0
 Flask-Login==0.6.3
 Flask-Mail==0.10.0
 greenlet==3.0.3
