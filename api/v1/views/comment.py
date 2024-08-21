@@ -141,7 +141,7 @@ def comments(post_id, comment_id):
             if len(v.strip()) == 0:
                 return jsonify({'error': f'Missing {k}'}), 400
             # update attribute
-            setattr(tag, k, v.strip())
+            setattr(comment, k, v.strip())
 
         # save changes
         try:
