@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ The Comment Model """
 
-from sqlalchemy import Column, ForeignKey, String, Text, INTEGER
+from sqlalchemy import Column, ForeignKey, String, TEXT, INTEGER
 from sqlalchemy.orm import relationship, backref
 from models.base import BaseClass, Base
 
@@ -15,10 +15,10 @@ class Comment(BaseClass, Base):
     post_id = Column(String(60), ForeignKey('posts.id'), nullable=False)
     # added column for author of comment
     author_id = Column(String(60), ForeignKey('users.id'), nullable=False)
-    parent_id = Column(String(60), ForeignKey('comments.id'), nullable=True)
-    content = Column(Text, nullable=False)
+    parent_id = Column(INTEGER, ForeignKey('comments.id'), nullable=True)
+    content = Column(TEXT, nullable=False)
     # used to track the level of comment and make querying easier
-    path = Column(Text, index=True)
+    path = Column(TEXT, index=True)
     replies = relationship('Comment',
                            backref=backref('parent', remote_side=[id]),
                            cascade='all, delete-orphan')
