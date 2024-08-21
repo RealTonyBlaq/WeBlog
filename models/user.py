@@ -20,6 +20,8 @@ class User(UserMixin, BaseClass, Base):
     is_email_verified = Column(Boolean, default=False)
     username = Column(String(25), nullable=True, unique=True)
     avatar_url = Column(String(100), nullable=True)
+    # added attribute for checking role
+    is_admin = Column(Boolean, default=False)
     # articles liked, many to many
     liked = relationship('Post', secondary=user_post_likes,
                          back_populates='likes')
