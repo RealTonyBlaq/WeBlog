@@ -1,7 +1,7 @@
 """WeBlog Flask Application"""
 from api.v1.views import app_views
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, render_template
 from flask_login import LoginManager # for managing authentication
 from flask_login import login_required
 from flask_cors import CORS
@@ -99,7 +99,7 @@ def unauthorized(_):
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>\n"
+    return render_template('index.html')
 
 
 if __name__ == "__main__":
