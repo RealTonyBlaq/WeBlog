@@ -163,7 +163,6 @@ def logout():
     """Logs out a user from the session"""
     logout_user()
     return jsonify({}), 200
-    return redirect('/')
 
 
 @app_views.route('/email_confirmation/<token>', strict_slashes=False)
@@ -188,12 +187,12 @@ def confirm_email(token):
     # redirect user to login or automatically log user in
     return redirect("/")
 
-@app_views.route('/reset_password', methods=['POST'], strict_slashes=False)
+
+@app_views.route('/forgot_password', methods=['POST'], strict_slashes=False)
 def send_password_reset_mail():
     """Sends a password reset email"""
     if current_user.is_authenticated:
         return jsonify({'error': 'User logged in'}), 400
-        return redirect('/')
 
     if not request.is_json:
         return jsonify({'error': 'Not a valid JSON'}), 400
