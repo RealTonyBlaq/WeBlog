@@ -97,9 +97,10 @@ def unauthorized(_):
     return jsonify({"error": "User unauthorized"}), 401
 
 
-@app.route("/")
-def hello_world():
-    return render_template('index.html')
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def home(path):
+    return render_template("index.html")
 
 
 if __name__ == "__main__":
