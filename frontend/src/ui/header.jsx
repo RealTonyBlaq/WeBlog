@@ -48,7 +48,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full flex items-center justify-between px-6 py-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 dark:text-white dark:bg-dark-navy-blue text-arsenic bg-white">
+    <header className="relative w-full flex items-center justify-between px-6 py-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 dark:text-white dark:bg-dark-navy-blue text-arsenic bg-white">
       <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl flex items-center justify-between">
         <div className="w-full flex gap-4 items-center">
           {/* WeBlog Logo */}
@@ -95,7 +95,7 @@ export default function Header() {
         >
           Create Post
         </Link>
-        <div className="relative">
+        <div className="">
           <p
             onClick={openUserMenu}
             className="w-10 md:w-12 h-10 md:h-12 p-2 md:p-3 font-semibold bg-arsenic dark:bg-white text-white dark:text-arsenic rounded-full cursor-pointer"
@@ -106,7 +106,7 @@ export default function Header() {
           {showUserMenu ? (
             <div
               ref={ref}
-              className="w-60 grid gap-2 absolute top-[calc(100%+24px)] -left-[calc(100%+32px)] p-4 bg-white dark:bg-dark-navy-blue/75 rounded-xl shadow-lg"
+              className="w-60 z-50 grid gap-2 absolute top-[80px] md:top-[88px] right-4 p-4 bg-white dark:bg-dark-navy-blue/75 rounded-xl shadow-lg"
             >
               <div className="w-full">
                 <p className="font-medium">Ubonisrael Akpanudoh</p>
