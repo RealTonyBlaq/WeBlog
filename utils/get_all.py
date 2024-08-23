@@ -14,7 +14,7 @@ def get_model_instances(model, filter=None, filter_id=None):
     limit = request.args.get('limit', type=int, default=10)
 
     if page < 1 or limit < 1:
-        return ({'error': 'Page number\
+        return ({'message': 'Page number\
                         or limit should not be less than 1'}, 400)
     
     # calculate start and end
@@ -45,7 +45,7 @@ def get_model_instances(model, filter=None, filter_id=None):
     total_pages = math.ceil(count / limit)
 
     if page != 1 and page > total_pages:
-        return ({'error': 'Page out of range'}, 404)
+        return ({'message': 'Page out of range'}, 404)
 
     objs_list = [obj.to_dict() for obj in objs]
     return ({'tags': objs_list, 'page': f'{page}',
