@@ -7,3 +7,19 @@
 * {
   scroll-behavior: smooth;
 }
+
+.email_conf_main {
+    min-height: calc(100vh - 120px);
+}
+
+@media (min-width: 640px) {
+  .email_conf_main {
+      min-height: calc(100vh - 136px);
+  }
+}
+
+@media (min-width: 768px) {
+  .email_conf_main {
+      min-height: calc(100vh - 140px);
+  }
+}
