@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import SearchBar from "./search-bar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useOutsideClick } from "../lib/useOutsideClick";
+import { useAuth } from "../lib/authContext";
+import toast from "react-hot-toast";
+import { logout } from "../api/auth";
 
 export default function Header() {
+  const { user, setUser } = useAuth();
   const [darkTheme, setTheme] = useState();
   const [showMenu, setMenu] = useState(false);
   const [showUserMenu, setUserMenu] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleToggleMenu = () => setMenu((prev) => !prev);
   const handleToggleTheme = () => {
@@ -82,55 +88,81 @@ export default function Header() {
           <SearchBar />
         </div>
       </div>
-      {/* <Link
-        to={"/signup"}
-        className="px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
-      >
-        Signup
-      </Link> */}
+
       <div className="flex items-center gap-4">
-        <Link
-          to={"/create_post"}
-          className="hidden lg:block px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
-        >
-          Create Post
-        </Link>
-        <div className="">
-          <p
-            onClick={openUserMenu}
-            className="w-10 md:w-12 h-10 md:h-12 p-2 md:p-3 font-semibold bg-arsenic dark:bg-white text-white dark:text-arsenic rounded-full cursor-pointer"
-          >
-            UA
-          </p>
-          {/* User Dropdown */}
-          {showUserMenu ? (
-            <div
-              ref={ref}
-              className="w-60 z-50 grid gap-2 absolute top-[80px] md:top-[88px] right-4 p-4 bg-white dark:bg-dark-navy-blue/75 rounded-xl shadow-lg"
+        {user ? (
+          <>
+            <Link
+              to={"/create_post"}
+              className="hidden lg:block px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
             >
-              <div className="w-full">
-                <p className="font-medium">Ubonisrael Akpanudoh</p>
-                <p className="text-sm">jakpanudoh@gmail.com</p>
-              </div>
-              <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
-              <div className="w-full">
-                <Link to={"/dashboard"} className="block p-1 ">
-                  Dashboard
-                </Link>
-                <Link to={"/dashboard"} className="block p-1 ">
-                  Create Post
-                </Link>
-                <Link to={"/bookmarks"} className="block p-1 ">
-                  Bookmarks
-                </Link>
-              </div>
-              <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
-              <Link to={"/logout"} className="block p-1">
-                Log Out
-              </Link>
+              Create Post
+            </Link>
+            <div className="">
+              <p
+                onClick={openUserMenu}
+                className="w-10 md:w-12 h-10 md:h-12 p-2 md:p-3 font-semibold bg-arsenic dark:bg-white text-white dark:text-arsenic rounded-full cursor-pointer"
+              >
+                {`${user.first_name[0]}${user.last_name[0]}`}
+              </p>
+              {/* User Dropdown */}
+              {showUserMenu ? (
+                <div
+                  ref={ref}
+                  className="min-w-60 z-50 grid gap-2 absolute top-[80px] md:top-[88px] right-4 p-4 bg-white dark:bg-dark-navy-blue/75 rounded-xl shadow-lg"
+                >
+                  <div className="w-full">
+                    <p className="font-medium">
+                      {user.first_name} {user.last_name}
+                    </p>
+                    <p className="text-sm">{user.email}</p>
+                  </div>
+                  <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
+                  <div className="w-full">
+                    <Link to={"/dashboard"} className="block p-1 ">
+                      Dashboard
+                    </Link>
+                    <Link to={"/dashboard"} className="block p-1 ">
+                      Create Post
+                    </Link>
+                    <Link to={"/bookmarks"} className="block p-1 ">
+                      Bookmarks
+                    </Link>
+                  </div>
+                  <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
+                  <div
+                    onClick={async () => {
+                      const data = await logout();
+                      const response = await data.json();
+                      setMenu(false)
+                      toast(response.message);
+                      setUser(null)
+                      navigate("/");
+                    }}
+                    className="block p-1 cursor-pointer"
+                  >
+                    Log Out
+                  </div>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
+          </>
+        ) : (
+          <>
+            <Link
+              to={"/signup"}
+              className="mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+            >
+              Signup
+            </Link>
+            <Link
+              to={"/login"}
+              className="mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+            >
+              Login
+            </Link>
+          </>
+        )}
         <button
           onClick={handleToggleTheme}
           className="flex text-arsenic dark:text-white items-center justify-center text-xl md:text-2xl"
