@@ -11,26 +11,23 @@ export default function SignUp() {
   const isLoading = signupLoading;
 
   const submitFormHandler = async (values) => {
-    console.log(values);
-    // signup({
-    //   first_name: values.first_name,
-    //   last_name: values.last_name,
-    //   email: values.email,
-    //   password: values.password,
-    //   confirm_password: values.confirm_password,
-    // });
+    signup({
+      first_name: values.first_name,
+      last_name: values.last_name,
+      email: values.email,
+      password: values.password,
+      confirm_password: values.confirm_password,
+    });
   };
 
   return (
     <div className="w-full h-[calc(100vh-128px)] sm:h-[calc(100vh-144px)] md:h-[calc(100vh-152px)] flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto grid md:grid-cols-[1fr_2fr] p-4 md:p-6 lg:p-8 xl:p-12 rounded-3xl shadow-lg bg-white dark:bg-dark-navy-blue">
+      <div className="w-[90%] max-w-2xl mx-auto grid md:grid-cols-[1fr_2fr] p-4 md:p-6 lg:p-8 xl:p-10 rounded-3xl shadow-lg bg-white dark:bg-dark-navy-blue">
         <div className="w-full flex flex-col gap-2 md:gap-4 px-2 md:px-4">
           <p className="text-2xl md:text-3xl xl:text-4xl text-center md:text-start font-bold text-arsenic dark:text-white">
             Sign Up
           </p>
-          <div className="w-full">
-            <div className="w-full text-arsenic dark:text-white">
-              <div className="w-full flex md:flex-col items-center justify-center gap-1 md:gap-2 text-sm">
+              <div className="w-full pb-4 md:mb-0 text-arsenic dark:text-white flex md:flex-col items-center justify-center gap-1 md:gap-2 text-sm">
                 <Link to="/signup" className="group">
                   You already have an account here?{" "}
                   <span className="group-hover:text-blue-900 dark:group-hover:text-blue-500">
@@ -38,8 +35,6 @@ export default function SignUp() {
                   </span>
                 </Link>
               </div>
-            </div>
-          </div>
         </div>
         <div className="w-full md:px-8">
           <Formik
@@ -58,7 +53,7 @@ export default function SignUp() {
           >
             {() => {
               return (
-                <Form className="w-full flex flex-col gap-3 md:gap-4 items-center">
+                <Form className="w-full max-w-sm mx-auto flex flex-col gap-3 md:gap-4 items-center">
                   <MyTextInput
                     label="First Name"
                     name="first_name"
