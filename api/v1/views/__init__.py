@@ -11,7 +11,7 @@ def admin_required(f):
             return f(*args, **kwargs)
         else:
             msg = "You need to be an admin to perform this action."
-            return jsonify({'error': msg}), 403
+            return jsonify({'message': msg}), 403
 
     return wrap
 

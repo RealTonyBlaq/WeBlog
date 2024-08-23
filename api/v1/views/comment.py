@@ -27,7 +27,7 @@ def comments(post_id, comment_id=None):
             # this returns a comment
             comment = db.query(Comment).filter(Comment.id == comment_id and Comment.post_id == post_id).first()
             if not comment:
-                return jsonify({'error': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
+                return jsonify({'message': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
             # get user associated with comment
             author = comment.author
             return jsonify({'Comment': comment.to_dict(), 'Author': author.to_dict()}), 200
@@ -39,7 +39,7 @@ def comments(post_id, comment_id=None):
         limit = request.args.get('limit', type=int, default=10)
 
         if page < 1 or limit < 1:
-            return ({'error': 'Page number\
+            return ({'message': 'Page number\
                         or limit should not be less than 1'}, 400)
         
         # calculate start
@@ -58,7 +58,7 @@ def comments(post_id, comment_id=None):
         total_pages = math.ceil(count / limit)
 
         if page != 1 and page > total_pages:
-            return ({'error': 'Page out of range'}, 404)
+            return ({'message': 'Page out of range'}, 404)
 
         comments_list = [comment.to_dict() for comment in comments]
         for comment in comments_list:
@@ -76,25 +76,25 @@ def modify_comments(post_id, comment_id):
 
     if request.method == 'POST':
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         content = data.get('content')
         parent_id = data.get('parent_id') # optional
 
         if not content and len(content) == 0:
-            return jsonify({'error': 'Missing content'}), 400
+            return jsonify({'message': 'Missing content'}), 400
         
         post = db.query(Post).filter(Post.id == post_id).first()
         if not post:
-            return jsonify({'error': f'Post-{post_id} not found'}), 400
+            return jsonify({'message': f'Post-{post_id} not found'}), 400
         
         comment = Comment(
             post_id=post_id, parent_id=parent_id,
@@ -106,10 +106,10 @@ def modify_comments(post_id, comment_id):
             db.save()
 
         except IntegrityError:
-            return jsonify({'error': 'Database error'})
+            return jsonify({'message': 'Database error'})
         
         msg = 'Comment created.'
-        return jsonify({'sucess': msg, 'comment': comment.to_dict()}), 201
+        return jsonify({'message': msg, 'comment': comment.to_dict()}), 201
     
     if request.method == "PATCH":
         allowed_attributes = [
@@ -117,29 +117,29 @@ def modify_comments(post_id, comment_id):
             ]
         
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         # only the author of a comment should be able to update it
         comment = db.query(Comment).filter(
             Comment.id == comment_id and Comment.post_id == post_id and Comment.author_id == user_id).first()
         if not comment:
-            return jsonify({'error': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
+            return jsonify({'message': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
 
         for k, v in data.items():
             # make sure to only update attributes
             if k not in allowed_attributes:
-                return jsonify({'error': f'Cannot update attribute - {k}'}), 400
+                return jsonify({'message': f'Cannot update attribute - {k}'}), 400
                 
             if len(v.strip()) == 0:
-                return jsonify({'error': f'Missing {k}'}), 400
+                return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
             setattr(comment, k, v.strip())
 
@@ -147,17 +147,17 @@ def modify_comments(post_id, comment_id):
         try:
             comment.save()
         except IntegrityError as f:
-            return jsonify({'error': f'{f}'})
+            return jsonify({'message': f'{f}'})
 
         msg = 'Comment updated successfully.'
-        return jsonify({'sucess': msg, 'comment': comment.to_dict()}), 200
+        return jsonify({'message': msg, 'comment': comment.to_dict()}), 200
     
     if request.method == 'DELETE':
         # delete comment
         comment = db.query(Comment).filter(
             Comment.id == comment_id and Comment.post_id == post_id and Comment.author_id == user_id).first()
         if not comment:
-            return jsonify({'error': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
+            return jsonify({'message': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
         
         comment.delete()
         return jsonify({}), 200
