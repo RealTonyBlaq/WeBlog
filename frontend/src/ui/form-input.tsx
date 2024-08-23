@@ -10,15 +10,15 @@ export const MyTextInput = ({
   return (
     <div className="relative w-full">
       <label
-        className="absolute -top-2 left-6 px-2 text-xs text-black dark:text-white bg-white dark:bg-eerie-black"
+        className="absolute -top-2 left-6 px-2 text-xs text-black dark:text-white bg-white dark:bg-gunmetal"
         htmlFor={props.id || props.name}
       >
         {label}
       </label>
       <input
-        className={`w-full p-2 md:px-4 md:py-2 text-lg border ${
+        className={`w-full p-2 md:px-4 md:py-2 md:text-lg border ${
           meta.error ? "border-red-600" : "border-black/25"
-        } hover:border-blue-500 outline-none focus:border-blue-500 dark:bg-eerie-black dark:text-white rounded-xl`}
+        } hover:border-blue-500 outline-none focus:border-blue-500 dark:bg-gunmetal dark:text-white rounded-xl`}
         {...field}
         {...props}
       />
