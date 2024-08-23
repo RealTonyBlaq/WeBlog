@@ -7,13 +7,17 @@ import GeneralLayout from "./ui/general-layout";
 import Login from "./routes/login/login";
 import { Toaster } from "react-hot-toast";
 import SignUp from "./routes/signup/signup";
+import ResetPassword from "./routes/reset_password/reset_password";
+import ForgotPassword from "./routes/forgot_password/forgot_password";
+import ResendConfirmationEmail from "./routes/resend_confirmation_email/resend_confirmation_email";
+import AuthProvider from "./lib/authContext";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <GeneralLayout />,
+    element: <AuthProvider><GeneralLayout /></AuthProvider>,
     errorElement: <div>Oops, error</div>,
     children: [
       {
@@ -23,6 +27,18 @@ const router = createBrowserRouter([
       {
         path: "/signup",
         element: <SignUp />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "/reset_password/:token/:user_id",
+        element: <ResetPassword />,
+      },
+      {
+        path: "/resend_conf_email",
+        element: <ResendConfirmationEmail />,
       },
     ],
   },
