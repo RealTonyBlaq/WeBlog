@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeBlog | Email COnfirmation</title>
+    <link
+      rel="stylesheet"
+      crossorigin
+      href="{{ url_for('static', filename='assets/index-czQYDM-J.css') }}"
+    />
+    <script
+      type="module"
+      crossorigin
+      src="{{ url_for('static', filename='assets/index-DCPMPJ8A.js') }}"
+    ></script>
+<script type="module" crossorigin src="/assets/index-DW7-x3I0.js"></script>
+  </head>
+  <body>
+    <header
+      class="relative w-full flex items-center justify-between px-6 py-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 dark:text-white dark:bg-dark-navy-blue text-arsenic bg-white"
+    >
+      <div
+        class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl flex items-center justify-between"
+      >
+        <div class="w-full flex gap-4 items-center">
+          <a href="/" class="block text-2xl md:text-3xl font-bold"> WeBlog </a>
+        </div>
+      </div>
+    </header>
+    <main
+      class="w-full flex items-center justify-center .email_conf_main min-h-[calc(100vh-128px)] sm:min-h-[calc(100vh-140px)] md:min-h-[calc(100vh-152px)] bg-lightGray dark:bg-eerie-black"
+    >
+      <div
+        class="w-full p-4 md:p-8 xl:p-10 max-w-sm bg-white rounded-xl text-arsenic dark:text-white"
+      >
+        <div class="w-full flex md:flex-col items-center justify-center">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div class="flashes">
+            {% for category, message in messages %}
+            {% if category == 'success' or category == 'already verified' %}
+            <p class="pb-4">{{ message }}</p>
+            <a
+            href="/login"
+              class="w-40 mx-auto py-2 cursor-pointer flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+            >
+              Login
+            </a>
+            {% endif %}
+            {% if category == 'logged in' %}
+            <p class="pb-4">{{ message }}</p>
+            <a
+            href="/"
+              class="w-40 mx-auto py-2 cursor-pointer flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+            >
+              Go Home
+            </a>
+            {% endif %}
+            {% if category == 'expired' %}
+            <p style="color: red;" class="pb-4">{{ message }}</p>
+            <a
+            style="width: 256px;"
+            href="/resend_conf_email"
+              class="mx-auto py-2 cursor-pointer flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+            >
+              Resend Confirmation Email
+            </a>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %} {% endwith %}
+        </div>
+      </div>
+    </main>
+    <footer
+      class="sticky top-0 left-0 w-full px-6 py-4 sm:px-8 sm:py-6 md:px-12 lg:px-20 xl:px-24 bg-slate-200 dark:bg-black text-black dark:text-white"
+    >
+      <p class="text-center text-arsenic dark:text-white font-medium">
+        Made with ❤️ and
+        <a target="_blank" href="https://flask.palletsprojects.com/en/3.0.x/">
+          Flask
+        </a>
+      </p>
+    </footer>
+  </body>
+</html>

@@ -20,7 +20,7 @@ def view_tags(tag_id=None):
             # this returns a tag
             tag = db.query(Tag).filter(Tag.id == tag_id).first()
             if not tag:
-                return jsonify({'error': f'tag with id-{tag_id} not found'}), 404
+                return jsonify({'message': f'tag with id-{tag_id} not found'}), 404
             return jsonify({'tag': tag.to_dict()}), 200
 
         # get all tags
@@ -44,26 +44,26 @@ def tags(tag_id=None):
     
     if request.method == "POST":
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
 
         if not data:
-                return jsonify({'error': 'Empty dataset'}), 400
+                return jsonify({'message': 'Empty dataset'}), 400
 
         # check that all required attributes are present
         name = data.get('name').strip().lower()
 
         if not name:
-            return jsonify({'error': 'Missing name'}), 400
+            return jsonify({'message': 'Missing name'}), 400
 
         # check that tag does not exist already
         existing_tag = db.query(Tag).filter(Tag.name == name).first()
         if existing_tag:
-            return jsonify({'error': 'Tag already exists'}), 400
+            return jsonify({'message': 'Tag already exists'}), 400
 
         # create tag
         tag = Tag(name=name)
@@ -71,35 +71,35 @@ def tags(tag_id=None):
             db.add(tag)
             db.save()
         except IntegrityError:
-            return jsonify({'error': 'Database integrity error'})
+            return jsonify({'message': 'Database integrity error'})
 
         msg = 'Tag created.'
-        return jsonify({'sucess': msg, 'tag': tag.to_dict()}), 201
+        return jsonify({'message': msg, 'tag': tag.to_dict()}), 201
 
     if request.method == "PATCH":
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
         if not tag:
-            return jsonify({'error': f'Tag with id {tag_id} not found'}), 404
+            return jsonify({'message': f'Tag with id {tag_id} not found'}), 404
 
         for k, v in data.items():
             # make sure to only update attributes
             if k not in allowed_attributes:
-                return jsonify({'error': f'Cannot update attribute - {k}'}), 400
+                return jsonify({'message': f'Cannot update attribute - {k}'}), 400
                 
             if len(v.strip()) == 0:
-                return jsonify({'error': f'Missing {k}'}), 400
+                return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
             setattr(tag, k, v.strip())
 
@@ -107,17 +107,17 @@ def tags(tag_id=None):
         try:
             tag.save()
         except IntegrityError as f:
-            return jsonify({'error': f'{f}'})
+            return jsonify({'message': f'{f}'})
 
         msg = 'Tag updated successfully.'
-        return jsonify({'sucess': msg, 'tag': tag.to_dict()}), 200
+        return jsonify({'message': msg, 'tag': tag.to_dict()}), 200
     
     if request.method == 'DELETE':
         # delete tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
         if not tag:
-            return jsonify({'error': f'Tag with id {tag_id} not found'}), 404
+            return jsonify({'message': f'Tag with id {tag_id} not found'}), 404
         
         tag.delete()
         return jsonify({}), 200

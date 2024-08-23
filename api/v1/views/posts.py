@@ -26,7 +26,7 @@ def get_post(post_id=None):
     # this returns an article
     article = db.query(Post).filter(Post.id == post_id).first()
     if not article:
-            return jsonify({'error': f'Post with id-{post_id} not found'}), 404
+            return jsonify({'message': f'Post with id-{post_id} not found'}), 404
     return jsonify({'post': article.to_dict()}), 200
 
 
@@ -43,7 +43,7 @@ def delete_post(post_id=None):
     post = db.query(Post).filter(Post.id == post_id).first()
 
     if not post:
-        return jsonify({'error': 'Post with id not found'}), 404
+        return jsonify({'message': 'Post with id not found'}), 404
         
     post.delete()
     return jsonify({}), 200

@@ -30,37 +30,33 @@ def profile():
         "username",
         "password"
     ]
-    user_id = current_user.get_id()
-    # find user
-    user = db.query(User).filter(User.id == user_id).first()
-
     if request.method == "GET":
         # return profile data
-        return jsonify(user.to_dict())
+        return jsonify({'user': current_user.to_dict(), 'status': 'success'})
 
     if request.method == "PATCH":
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
 
         # if password is present, verify properties
         if data.get('password'):
             # check if login is fresh
             if not login_fresh():
-                return jsonify({'error': 'Current login not fresh'}), 400
+                return jsonify({'message': 'Current login not fresh'}), 400
             password = data.get('password').strip()
             confirm_password = data.get('confirm_password').strip()
             if not confirm_password:
-                return jsonify({'error': 'confirm_password missing'}), 400
+                return jsonify({'message': 'confirm_password missing'}), 400
             if password != confirm_password:
-                return jsonify({'error': 'Passwords do not match'}), 400
+                return jsonify({'message': 'Passwords do not match'}), 400
             # hash users password
             salt = gensalt()
             hashed_password = hashpw(password.encode('utf-8'), salt)
@@ -71,37 +67,37 @@ def profile():
                 continue
             # make sure to only update attributes
             if k not in allowed_attributes:
-                return jsonify({'error': f'Cannot update attribute - {k}'}), 400
+                return jsonify({'message': f'Cannot update attribute - {k}'}), 400
             if k == 'email':
                 # check if login is fresh
                 if not login_fresh():
-                    return jsonify({'error': 'Current login not fresh'}), 400
+                    return jsonify({'message': 'Current login not fresh'}), 400
                 # check that email is valid
                 # if not await verify_email(email):
-                #     return jsonify({'error': 'Invalid email'}), 400
+                #     return jsonify({'message': 'Invalid email'}), 400
                 # make sure no other user is using that email
                 another_user = db.query(User).filter(User.email == v).first()
-                if another_user and another_user.id != user_id:
-                    return jsonify({'error': f'Cannot update attribute - {k}, {v} already in use'}), 400
+                if another_user and another_user.id != current_user.get_id():
+                    return jsonify({'message': f'Cannot update attribute - {k}, {v} already in use'}), 400
                 
             if len(v.strip()) == 0:
-                return jsonify({'error': f'Missing {k}'}), 400
+                return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
-            setattr(user, k, hashed_password if k == 'password' else v.strip())
+            setattr(current_user, k, hashed_password if k == 'password' else v.strip())
 
         # save changes
         try:
-            user.save()
+            current_user.save()
         except IntegrityError as f:
-            return jsonify({'error': f'{f}'})
+            return jsonify({'message': f'{f}'})
 
         msg = 'Profile updated successfully.'
-        return jsonify({'sucess': msg, 'user': user.to_dict()}), 200
+        return jsonify({'message': msg, 'user': current_user.to_dict()}), 200
     
     if request.method == 'DELETE':
         # delete user
-        logout_user(user)
-        user.delete()
+        logout_user(current_user)
+        current_user.delete()
         return jsonify({}), 200
 
 
@@ -131,7 +127,7 @@ def my_posts(post_id=None):
             # this returns an article
             article = db.query(Post).filter(Post.id == post_id).first()
             if not article:
-                return jsonify({'error': f'Post with id-{post_id} not found'}), 404
+                return jsonify({'message': f'Post with id-{post_id} not found'}), 404
             return jsonify({'post': article.to_dict()}), 200
         
         # return all articles by this user
@@ -140,24 +136,24 @@ def my_posts(post_id=None):
     
     if request.method == 'POST':
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         header_url = data.get('header_url')
         title = data.get('title')
         body = data.get('body')
 
         if not title and len(title) == 0:
-            return jsonify({'error': 'Missing title'}), 400
+            return jsonify({'message': 'Missing title'}), 400
         if not body and len(body) == 0:
-            return jsonify({'error': 'Missing body'}), 400
+            return jsonify({'message': 'Missing body'}), 400
         
         post = Post(
             title=title, body=body,
@@ -168,18 +164,18 @@ def my_posts(post_id=None):
             db.save()
 
         except IntegrityError:
-            return jsonify({'error': 'Database integrity error'})
+            return jsonify({'message': 'Database integrity error'})
         
         # add tags
         tag_ids = data.get('tag_ids')  # a list of tag_id's
         if tag_ids:
             if type(tag_ids) is not list:
-                return jsonify({'error': f'tag_ids must be an array'}), 400
+                return jsonify({'message': f'tag_ids must be an array'}), 400
             tags = []
             for tag_id in tag_ids:
                 tag = db.query(Tag).filter(Tag.id == tag_id).first()
                 if not tag:
-                    return jsonify({'error': f'Tag-{tag_id} not found'}), 404
+                    return jsonify({'message': f'Tag-{tag_id} not found'}), 404
                 tags.append(tag)
                 
             try:
@@ -187,37 +183,37 @@ def my_posts(post_id=None):
                 post.save()
             except IntegrityError:
                 db.rollback()
-                return jsonify({'error': 'Database error'})
+                return jsonify({'message': 'Database error'})
         
         msg = 'Post created.'
-        return jsonify({'sucess': msg, 'tag': post.to_dict()}), 201
+        return jsonify({'message': msg, 'tag': post.to_dict()}), 201
     
     if request.method == 'PATCH':
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
     
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         # only the author of a post should be able to update it
         post = db.query(Post).filter(Post.id == post_id and Post.author_id == user_id).first()
 
         if not post:
-            return jsonify({'error': f'Post with id-{post_id} \
+            return jsonify({'message': f'Post with id-{post_id} \
                             belonging to {user_id} not found'}), 404
         
         for k, v in data.items():
         # make sure to only update attributes
             if k not in allowed_attributes:
-                return jsonify({'error': f'Cannot update attribute - {k}'}), 400
+                return jsonify({'message': f'Cannot update attribute - {k}'}), 400
                 
             if len(v.strip()) == 0:
-                return jsonify({'error': f'Missing {k}'}), 400
+                return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
             setattr(post, k, v.strip())
 
@@ -225,18 +221,18 @@ def my_posts(post_id=None):
         try:
             post.save()
         except IntegrityError as f:
-            return jsonify({'error': f'{f}'})
+            return jsonify({'message': f'{f}'})
         
         # update tags
         tag_ids = data.get('tag_ids')  # a list of tag_id's
         if tag_ids:
             if type(tag_ids) is not list:
-                return jsonify({'error': f'tag_ids must be an array'}), 400
+                return jsonify({'message': f'tag_ids must be an array'}), 400
             tags = []
             for tag_id in tag_ids:
                 tag = db.query(Tag).filter(Tag.id == tag_id).first()
                 if not tag:
-                    return jsonify({'error': f'Tag-{tag_id} not found'}), 404
+                    return jsonify({'message': f'Tag-{tag_id} not found'}), 404
                 tags.append(tag)
                 
             try:
@@ -244,17 +240,17 @@ def my_posts(post_id=None):
                 post.save()
             except IntegrityError:
                 db.rollback()
-                return jsonify({'error': 'Database error'})
+                return jsonify({'message': 'Database error'})
 
         msg = 'Post updated successfully.'
-        return jsonify({'sucess': msg, 'tag': post.to_dict()}), 200
+        return jsonify({'message': msg, 'tag': post.to_dict()}), 200
     
     if request.method == 'DELETE':
         # delete post
         post = db.query(Post).filter(Post.id == post_id and Post.author_id == user_id).first()
 
         if not post:
-            return jsonify({'error': f'Tag with id {post_id}\
+            return jsonify({'message': f'Tag with id {post_id}\
                             belonging to {user_id} not found'}), 404
         
         post.delete()
@@ -277,72 +273,69 @@ def my_tags(tag_id=None):
 
     if request.method == 'GET':
         # find user
-        user = db.query(User).filter(User.id == user_id).first()
-        return jsonify({'tags': [tag.to_dict() for tag in user.interested_subjects]}), 200
+        return jsonify({'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
     
     if request.method == 'POST':
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
         
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
         
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         tag_id = data.get('tag_id')
 
         if not tag_id and len(tag_id) == 0:
-            return jsonify({'error': 'Missing tag_id'}), 400
+            return jsonify({'message': 'Missing tag_id'}), 400
         
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         
         if not tag:
-            return jsonify({'error': f'Tag wit id-{tag_id} not found'}), 404
+            return jsonify({'message': f'Tag wit id-{tag_id} not found'}), 404
         
         try:
-            user = db.query(User).filter(User.id == user_id).first()
-            user.interested_subjects.append(tag)
-            user.save()
+            current_user.interested_subjects.append(tag)
+            current_user.save()
         except IntegrityError:
-            return jsonify({'error': 'Database integrity error'})
+            return jsonify({'message': 'Database integrity error'})
         
         msg = 'Tag has been added to your list.'
-        return jsonify({'success': msg,
-                        'tags': [tag.to_dict() for tag in user.interested_subjects]}), 200
+        return jsonify({'message': msg,
+                        'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
 
     if request.method == 'DELETE':
         if not request.is_json:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
         
         try:
             data = request.get_json()
         except BadRequest:
-            return jsonify({'error': 'Not a valid JSON'}), 400
+            return jsonify({'message': 'Not a valid JSON'}), 400
         
         if not data:
-            return jsonify({'error': 'Empty dataset'}), 400
+            return jsonify({'message': 'Empty dataset'}), 400
         
         tag_id = data.get('tag_id')
 
         if not tag_id and len(tag_id) == 0:
-            return jsonify({'error': 'Missing tag_id'}), 400
+            return jsonify({'message': 'Missing tag_id'}), 400
         
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         
         if not tag:
-            return jsonify({'error': f'Tag wit id-{tag_id} not found'}), 404
+            return jsonify({'message': f'Tag wit id-{tag_id} not found'}), 404
         
         try:
-            user = db.query(User).filter(User.id == user_id).first()
-            new_list = filter(lambda x: x.id == tag_id, user.interested_subjects)
-            user.interested_subjects = new_list
-            user.save()
+            new_list = filter(lambda x: x.id == tag_id, current_user.interested_subjects)
+            current_user.interested_subjects = new_list
+            current_user.save()
         except IntegrityError:
-            return jsonify({'error': 'Database integrity error'})
+            return jsonify({'message': 'Database integrity error'})
         
         msg = 'Tag has been removed from your list.'
-        return jsonify({'success': msg,
-                        'tags': [tag.to_dict() for tag in user.interested_subjects]}), 200
+        return jsonify({'message': msg,
+                        'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
