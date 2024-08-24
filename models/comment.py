@@ -22,14 +22,19 @@ class Comment(BaseClass, Base):
     replies = relationship('Comment',
                            backref=backref('parent', remote_side=[id]),
                            cascade='all, delete-orphan')
-    author = relationship('User', backref=backref('comments', cascade='all, delete-orphan'))
+    author = relationship('User',
+                          backref=backref('comments',
+                                          cascade='all, delete-orphan'))
 
     def __init__(self, *args, **kwargs):
         """Initializes an instance of the model"""
         from utils import db
-        super().__init__(*args, **kwargs)
+        super(Comment, self).__init__(*args, **kwargs)
         last_comment = db.query(Comment).order_by(Comment.id.desc()).first()
-        self.id =  last_comment.id + 1
+        if last_comment is not None:
+            self.id = last_comment.id + 1
+        else:
+            self.id = 1
 
     def __str__(self):
         """String representation of the BaseModel class"""
@@ -41,8 +46,8 @@ class Comment(BaseClass, Base):
         super().save()
         if not self.path:
             from utils import db
-            prefix =  f'{self.parent.path}.' if self.parent else ''
-            self.path =  '{}{:0{}d}'.format(prefix, self.id, self._N)
+            prefix = f'{self.parent.path}.' if self.parent else ''
+            self.path = '{}{:0{}d}'.format(prefix, self.id, self._N)
             db.save()
 
     def level(self):
