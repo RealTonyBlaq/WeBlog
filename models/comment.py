@@ -18,19 +18,31 @@ class Comment(BaseClass, Base):
     parent_id = Column(INTEGER, ForeignKey('comments.id'), nullable=True)
     content = Column(TEXT, nullable=False)
     # used to track the level of comment and make querying easier
-    path = Column(TEXT, index=True)
+    path = Column(TEXT, nullable=True)
     replies = relationship('Comment',
                            backref=backref('parent', remote_side=[id]),
                            cascade='all, delete-orphan')
     author = relationship('User', backref=backref('comments', cascade='all, delete-orphan'))
-    
+
+    def __init__(self, *args, **kwargs):
+        """Initializes an instance of the model"""
+        from utils import db
+        super().__init__(*args, **kwargs)
+        last_comment = db.query(Comment).order_by(Comment.id.desc()).first()
+        self.id =  last_comment.id + 1
+
+    def __str__(self):
+        """String representation of the BaseModel class"""
+        return "[{:s}] ({:d}) {}".format(self.__class__.__name__, self.id,
+                                         self.__dict__)
+
     def save(self):
         """updates the attribute 'updated_at' with the current datetime"""
         super().save()
         if not self.path:
             from utils import db
-            prefix = self.parent.path + '.' if self.parent else ''
-            self.path = prefix + '{:0{}d}'.format(self.id, self._N)
+            prefix =  f'{self.parent.path}.' if self.parent else ''
+            self.path =  '{}{:0{}d}'.format(prefix, self.id, self._N)
             db.save()
 
     def level(self):
