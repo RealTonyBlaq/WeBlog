@@ -8,8 +8,8 @@ from models.post import Post
 from models.tag import Tag
 from sqlalchemy.exc import IntegrityError
 from utils import db
-from utils.get_all import get_model_instances
 from werkzeug.exceptions import BadRequest
+import math
 
 
 @app_views.route("/me", methods=["GET", "PATCH", "DELETE"],
@@ -32,7 +32,12 @@ def profile():
     ]
     if request.method == "GET":
         # return profile data
-        return jsonify({'user': current_user.to_dict(), 'status': 'success'})
+        user = current_user.to_dict()
+        user['tags'] = [tag.id for tag in current_user.interested_subjects]
+        user['bookmarks'] = [post.id for post in current_user.bookmarks]
+        user['liked'] = [post.id for post in current_user.liked]
+        user['articles'] = [post.to_dict() for post in current_user.articles]
+        return jsonify({'user': user, 'status': 'success'})
 
     if request.method == "PATCH":
         if not request.is_json:
@@ -96,7 +101,6 @@ def profile():
     
     if request.method == 'DELETE':
         # delete user
-        logout_user(current_user)
         current_user.delete()
         return jsonify({}), 200
 
@@ -104,7 +108,7 @@ def profile():
 @app_views.route('/my_posts', methods=['GET', 'POST'],
                  strict_slashes=False)
 @app_views.route('/my_posts/<post_id>',
-                 methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
+                 methods=['GET', 'PATCH', 'DELETE'], strict_slashes=False)
 @login_required
 def my_posts(post_id=None):
     """
@@ -118,7 +122,8 @@ def my_posts(post_id=None):
     allowed_attributes = [
         "header_url",
         "title",
-        "body"
+        "body",
+        "tag_ids"
     ]
     user_id = current_user.get_id()
 
@@ -131,8 +136,30 @@ def my_posts(post_id=None):
             return jsonify({'post': article.to_dict()}), 200
         
         # return all articles by this user
-        response, code =  get_model_instances(Post, filter='author_id', filter_id=user_id)
-        return jsonify(response), code
+        # get page number
+        page = request.args.get('page', type=int, default=1)
+        # get limit number
+        limit = request.args.get('limit', type=int, default=10)
+
+        if page < 1 or limit < 1:
+            return ({'message': 'Page number\
+                     or limit should not be less than 1'}, 400)
+    
+        my_articles = []
+        for article in current_user.articles:
+            new_obj = article.to_dict()
+            new_obj['no_of_comments'] = len(article.comments)
+            new_obj['no_of_likes'] = len(article.likes)
+            new_obj['tags'] = [tag.name for tag in article.tags]
+            my_articles.append(new_obj)
+        count = len(my_articles)
+        total_pages = math.ceil(count / limit)
+
+        if page != 1 and page > total_pages:
+            return ({'message': 'Page out of range'}, 404)
+
+        return ({'data': my_articles, 'page': f'{page}',
+                 'total_pages': f"{total_pages}"}, 200)
     
     if request.method == 'POST':
         if not request.is_json:
@@ -185,8 +212,13 @@ def my_posts(post_id=None):
                 db.rollback()
                 return jsonify({'message': 'Database error'})
         
+        post_dict = post.to_dict()
+        # print(post)
+        if "tags" in post_dict:
+            del post_dict['tags']
+            post_dict["tags"] = [tag.name for tag in post.tags]
         msg = 'Post created.'
-        return jsonify({'message': msg, 'tag': post.to_dict()}), 201
+        return jsonify({'message': msg, 'post': post_dict}), 201
     
     if request.method == 'PATCH':
         if not request.is_json:
@@ -212,10 +244,11 @@ def my_posts(post_id=None):
             if k not in allowed_attributes:
                 return jsonify({'message': f'Cannot update attribute - {k}'}), 400
                 
-            if len(v.strip()) == 0:
+            if k != 'tag_ids' and len(v.strip()) == 0:
                 return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
-            setattr(post, k, v.strip())
+            if k != 'tag_ids':
+                setattr(post, k, v.strip())
 
         # save changes
         try:
@@ -242,15 +275,19 @@ def my_posts(post_id=None):
                 db.rollback()
                 return jsonify({'message': 'Database error'})
 
+        post_dict = post.to_dict()
+        if "tags" in post_dict:
+            del post_dict['tags']
+            post_dict["tags"] = [tag.name for tag in post.tags]
         msg = 'Post updated successfully.'
-        return jsonify({'message': msg, 'tag': post.to_dict()}), 200
+        return jsonify({'message': msg, 'post': post_dict}), 200
     
     if request.method == 'DELETE':
         # delete post
         post = db.query(Post).filter(Post.id == post_id and Post.author_id == user_id).first()
 
         if not post:
-            return jsonify({'message': f'Tag with id {post_id}\
+            return jsonify({'message': f'Post with id {post_id}\
                             belonging to {user_id} not found'}), 404
         
         post.delete()
@@ -269,29 +306,11 @@ def my_tags(tag_id=None):
     PUT - adds a tag to a user's profile
     DELETE - deletes a tag from a user's profile
     """
-    user_id = current_user.get_id()
-
     if request.method == 'GET':
         # find user
         return jsonify({'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
     
     if request.method == 'POST':
-        if not request.is_json:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-        
-        try:
-            data = request.get_json()
-        except BadRequest:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-        
-        if not data:
-            return jsonify({'message': 'Empty dataset'}), 400
-        
-        tag_id = data.get('tag_id')
-
-        if not tag_id and len(tag_id) == 0:
-            return jsonify({'message': 'Missing tag_id'}), 400
-        
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         
         if not tag:
@@ -308,29 +327,13 @@ def my_tags(tag_id=None):
                         'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
 
     if request.method == 'DELETE':
-        if not request.is_json:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-        
-        try:
-            data = request.get_json()
-        except BadRequest:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-        
-        if not data:
-            return jsonify({'message': 'Empty dataset'}), 400
-        
-        tag_id = data.get('tag_id')
-
-        if not tag_id and len(tag_id) == 0:
-            return jsonify({'message': 'Missing tag_id'}), 400
-        
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
         
         if not tag:
             return jsonify({'message': f'Tag wit id-{tag_id} not found'}), 404
         
         try:
-            new_list = filter(lambda x: x.id == tag_id, current_user.interested_subjects)
+            new_list = list(filter(lambda x: x.id != tag_id, current_user.interested_subjects))
             current_user.interested_subjects = new_list
             current_user.save()
         except IntegrityError:
@@ -339,3 +342,92 @@ def my_tags(tag_id=None):
         msg = 'Tag has been removed from your list.'
         return jsonify({'message': msg,
                         'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
+
+
+@app_views.route('/me/bookmarks/<post_id>',
+                 methods=['POST', 'DELETE'], strict_slashes=False)
+@login_required
+def my_bookmarks(post_id=None):
+    """
+    ** API endpoint for a user's posts ***
+    PUT - adds a post to a user's bookmarks
+    DELETE - deletes a post from a user's bookmarks
+    """
+    if request.method == 'GET':
+        return jsonify({'bookmarks': [post.to_dict() for post in current_user.bookmarks]}), 200
+    
+    if request.method == 'POST':
+        post = db.query(Post).filter(Post.id == post_id).first()
+        
+        if not post:
+            return jsonify({'message': f'Post wit id-{post_id} not found'}), 404
+        
+        try:
+            current_user.bookmarks.append(post)
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'})
+        
+        msg = 'Post has been added to your bookmarks.'
+        return jsonify({'message': msg,
+                        'posts': [post.to_dict() for post in current_user.bookmarks]}), 200
+
+    if request.method == 'DELETE':
+        post = db.query(Post).filter(Post.id == post_id).first()
+        
+        if not post:
+            return jsonify({'message': f'Tag wit id-{post_id} not found'}), 404
+        
+        try:
+            new_list = list(filter(lambda x: x.id != post_id, current_user.bookmarks))
+            current_user.bookmarks = new_list
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'})
+        
+        msg = 'post has been removed from your bookmarks.'
+        return jsonify({'message': msg,
+                        'posts': [post.to_dict() for post in current_user.bookmarks]}), 200
+
+
+@app_views.route('/me/liked_articles/<post_id>',
+                 methods=['POST', 'DELETE'], strict_slashes=False)
+@login_required
+def my_liked_article(post_id=None):
+    """
+    ** API endpoint for a user's liked_articles ***
+    PUT - adds a post to a user's liked_articles
+    DELETE - deletes a post from a user's liked_articles
+    """
+    if request.method == 'POST':
+        post = db.query(Post).filter(Post.id == post_id).first()
+        
+        if not post:
+            return jsonify({'message': f'Post wit id-{post_id} not found'}), 404
+        
+        try:
+            current_user.liked.append(post)
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'})
+        
+        msg = 'Post has been added to your list.'
+        return jsonify({'message': msg,
+                        'posts': [post.to_dict() for post in current_user.liked]}), 200
+
+    if request.method == 'DELETE':
+        post = db.query(Post).filter(Post.id == post_id).first()
+        
+        if not post:
+            return jsonify({'message': f'Tag wit id-{post_id} not found'}), 404
+        
+        try:
+            new_list = list(filter(lambda x: x.id != post_id, current_user.liked))
+            current_user.liked = new_list
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'})
+        
+        msg = 'Post has been removed from your list.'
+        return jsonify({'message': msg,
+                        'posts': [post.to_dict() for post in current_user.liked]}), 200
