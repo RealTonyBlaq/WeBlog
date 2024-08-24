@@ -25,7 +25,7 @@ class User(UserMixin, BaseClass, Base):
     # articles liked, many to many
     liked = relationship('Post', secondary=user_post_likes,
                          back_populates='likes')
-    articles = relationship('Post', backref='users',
+    articles = relationship('Post', backref='author',
                             cascade='all, delete, delete-orphan')
     bookmarks = relationship('Post', secondary=user_post,
                              back_populates='bookmarked_by')
