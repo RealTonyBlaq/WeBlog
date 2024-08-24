@@ -11,9 +11,9 @@ from werkzeug.exceptions import BadRequest
 import math
 
 
-@app_views.route("/post/<post_id>/comments", methods=["GET"],
+@app_views.route("/posts/<post_id>/comments", methods=["GET"],
                  strict_slashes=False)
-@app_views.route("/post/<post_id>/comments/<comment_id>", methods=["GET"],
+@app_views.route("/posts/<post_id>/comments/<comment_id>", methods=["GET"],
                  strict_slashes=False)
 def comments(post_id, comment_id=None):
     """
@@ -29,8 +29,13 @@ def comments(post_id, comment_id=None):
             if not comment:
                 return jsonify({'message': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
             # get user associated with comment
-            author = comment.author
-            return jsonify({'Comment': comment.to_dict(), 'Author': author.to_dict()}), 200
+            author =  {'first_name': comment.author.first_name,
+                       'last_name': comment.author.last_name,
+                       'id': comment.author.id,
+                       'avatar_url': comment.author.avatar_url,
+                       'email': comment.author.email}
+            del comment.author
+            return jsonify({'Comment': comment.to_dict(), 'Author': author}), 200
 
         # get all comments
         # get page number
@@ -60,17 +65,24 @@ def comments(post_id, comment_id=None):
         if page != 1 and page > total_pages:
             return ({'message': 'Page out of range'}, 404)
 
-        comments_list = [comment.to_dict() for comment in comments]
-        for comment in comments_list:
-            comment['author'] = comment.author.to_dict()
+        comments_list = []
+        for comment in comments:
+            obj = comment.to_dict()
+            author = comment.author
+            obj['author'] =  {'first_name': author.first_name,
+                              'last_name': author.last_name,
+                              'id': author.id,
+                              'avatar_url': author.avatar_url,
+                              'email': author.email}
+            comments_list.append(obj)
         return ({'comments': comments_list, 'page': f'{page}',
                  'total_pages': f"{total_pages}"}), 200
 
 
-@app_views.route('/post/<post_id>/comments', methods=['POST'], strict_slashes=False)
-@app_views.route('/post/<post_id>/comments/<comment_id>', methods=['PATCH', 'DELETE'], strict_slashes=False)
+@app_views.route('/posts/<post_id>/comments', methods=['POST'], strict_slashes=False)
+@app_views.route('/posts/<post_id>/comments/<comment_id>', methods=['PATCH', 'DELETE'], strict_slashes=False)
 @login_required
-def modify_comments(post_id, comment_id):
+def modify_comments(post_id, comment_id=None):
     """ creates and modifies a comment """
     user_id = current_user.get_id()
 
@@ -102,14 +114,14 @@ def modify_comments(post_id, comment_id):
         )
         
         try:
-            db.add(comment)
-            db.save()
-
-        except IntegrityError:
-            return jsonify({'message': 'Database error'})
+            comment.save()
+        except IntegrityError as e:
+            return jsonify({'message': f'Database error: {e}'}), 500
         
         msg = 'Comment created.'
-        return jsonify({'message': msg, 'comment': comment.to_dict()}), 201
+        comment_dict = comment.to_dict()
+        del comment_dict['parent']
+        return jsonify({'message': msg, 'comment': comment_dict}), 201
     
     if request.method == "PATCH":
         allowed_attributes = [
