@@ -2,7 +2,7 @@
 from api.v1.views import app_views
 from bcrypt import gensalt, hashpw
 from flask import jsonify, request
-from flask_login import login_required, logout_user, current_user, login_fresh
+from flask_login import login_required, current_user, login_fresh
 from models.user import User
 from models.post import Post
 from models.tag import Tag
@@ -213,7 +213,6 @@ def my_posts(post_id=None):
                 return jsonify({'message': 'Database error'})
         
         post_dict = post.to_dict()
-        # print(post)
         if "tags" in post_dict:
             del post_dict['tags']
             post_dict["tags"] = [tag.name for tag in post.tags]
