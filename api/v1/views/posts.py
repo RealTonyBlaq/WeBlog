@@ -27,7 +27,13 @@ def get_post(post_id=None):
     article = db.query(Post).filter(Post.id == post_id).first()
     if not article:
             return jsonify({'message': f'Post with id-{post_id} not found'}), 404
-    return jsonify({'post': article.to_dict()}), 200
+    return jsonify({'post': article.to_dict(),
+                    'tags' : [tag.name for tag in article.tags],
+                    'author': {'first_name': article.author.first_name,
+                    'last_name': article.author.last_name,
+                    'id': article.author.id,
+                    'avatar_url': article.author.avatar_url,
+                    'email': article.author.email}}), 200
 
 
 @app_views.route("/posts/<post_id>", methods=["DELETE"], strict_slashes=False)
