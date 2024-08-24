@@ -18,7 +18,7 @@ print(f"Loading .env file from: {dotenv_path}")
 load_dotenv(dotenv_path)
 
 
-classes = {User: "User", Post: "Post", Tag: "Tag", Comment: "Comment"}
+classes = {"User": User, "Post": Post, "Tag": Tag, "Comment": Comment}
 
 
 class Storage:
