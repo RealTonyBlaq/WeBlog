@@ -23,10 +23,7 @@ def get_model_instances(model, filter=None, filter_id=None):
     # objs = db.query(model).slice(start, start + limit)
     # count = db.query(model).count()
 
-    if filter and filter_id:
-        query = db.query(model).filter(model[filter] == filter_id)
-    else:
-        query = db.query(model)
+    query = db.query(model)
 
     futures = [
         executor.submit(query.slice, start, start + limit),
@@ -42,11 +39,22 @@ def get_model_instances(model, filter=None, filter_id=None):
     # objs = objs_query.all()
     # count = objs[0].total_count if objs else 0
 
+    # list to be returned
+    objs_list = []
+    # add tags and number of comments to each object
+    for obj in objs:
+        new_obj = obj.to_dict()
+        if new_obj.get('__class__') == 'Post':
+            new_obj['author'] = f"{obj.author.first_name} {obj.author.last_name}"
+            new_obj['no_of_comments'] = len(obj.comments)
+            new_obj['no_of_likes'] = len(obj.likes)
+            new_obj['tags'] = [tag.name for tag in obj.tags]
+        objs_list.append(new_obj)
+
     total_pages = math.ceil(count / limit)
 
     if page != 1 and page > total_pages:
         return ({'message': 'Page out of range'}, 404)
 
-    objs_list = [obj.to_dict() for obj in objs]
-    return ({'tags': objs_list, 'page': f'{page}',
+    return ({'data': objs_list, 'page': f'{page}',
                     'total_pages': f"{total_pages}"}, 200)
