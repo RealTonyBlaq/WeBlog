@@ -3,10 +3,10 @@ import { Bars } from "react-loader-spinner";
 import { Form, Formik } from "formik";
 import { loginSchema } from "../../lib/utils";
 import { MyTextInput } from "../../ui/form-input";
-import { useAuth } from "../../lib/authContext";
 import { loginWithEmail } from "../../api/auth";
 import toast from "react-hot-toast";
 import { useState } from "react";
+import { useAuth } from "../../lib/useAuth";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -90,7 +90,7 @@ export default function Login() {
                   Forgot your password?
                 </Link>
                 <Link to="/signup" className="group">
-                  Don't have an account?{" "}
+                  Don`&apos;`t have an account?{" "}
                   <span className="group-hover:text-blue-900 dark:group-hover:text-blue-500">
                     Sign up
                   </span>

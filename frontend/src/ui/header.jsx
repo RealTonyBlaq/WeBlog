@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import SearchBar from "./search-bar";
 import { Link, useNavigate } from "react-router-dom";
 import { useOutsideClick } from "../lib/useOutsideClick";
-import { useAuth } from "../lib/authContext";
 import toast from "react-hot-toast";
 import { logout } from "../api/auth";
+import { useAuth } from "../lib/useAuth";
 
 export default function Header() {
   const { user, setUser } = useAuth();
@@ -151,13 +151,13 @@ export default function Header() {
           <>
             <Link
               to={"/signup"}
-              className="mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+              className="hidden lg:block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
             >
               Signup
             </Link>
             <Link
               to={"/login"}
-              className="mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+              className="hidden lg:block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
             >
               Login
             </Link>
