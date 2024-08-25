@@ -83,3 +83,20 @@ export const resetPasswordSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Mismatched passwords")
     .required("Please confirm your password"),
 });
+
+export const updateProfileSchema = yup.object().shape({
+  first_name: yup.string(),
+  last_name: yup.string(),
+  email: yup
+    .string()
+    .email()
+    .test("is-valid-domain", "Invalid email address", validateEmailDomain),
+});
+
+export const changePasswordSchema = yup.object().shape({
+  password: yup.string().required("Password is required"),
+  confirm_password: yup
+    .string()
+    .oneOf([yup.ref("password")], "Mismatched passwords")
+    .required("Please confirm your password"),
+});
