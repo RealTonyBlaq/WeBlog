@@ -2,7 +2,6 @@
 """ BaseClass Test Suite """
 
 import unittest
-from uuid import uuid4
 import inspect
 import models.base
 from models.base import BaseClass, time
