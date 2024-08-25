@@ -35,8 +35,7 @@ class BaseClass:
             else:
                 self.updated_at = datetime.now()
 
-            if kwargs.get("id", None) is None:
-                self.id = str(uuid.uuid4())
+            self.id = str(uuid.uuid4())
         else:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
@@ -61,6 +60,8 @@ class BaseClass:
             new_dict["created_at"] = new_dict["created_at"].strftime(time)
         if "updated_at" in new_dict:
             new_dict["updated_at"] = new_dict["updated_at"].strftime(time)
+        if "last_login" in new_dict:
+            new_dict['last_login'] = new_dict['last_login'].strftime(time)
         new_dict["__class__"] = self.__class__.__name__
         if "_sa_instance_state" in new_dict:
             del new_dict["_sa_instance_state"]

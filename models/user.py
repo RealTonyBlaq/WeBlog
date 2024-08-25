@@ -17,6 +17,7 @@ class User(UserMixin, BaseClass, Base):
     email = Column(String(60), nullable=False, unique=True)
     last_login = Column(DateTime, default=datetime.now())
     password = Column(String(60), nullable=False)
+    is_logged_in = Column(Boolean, default=False)
     is_email_verified = Column(Boolean, default=False)
     username = Column(String(25), nullable=True, unique=True)
     avatar_url = Column(String(100), nullable=True)
@@ -36,6 +37,13 @@ class User(UserMixin, BaseClass, Base):
     def is_active(self):
         """Checks whether a user is active"""
         return self.is_email_verified
+
+
+    @property
+    def is_authenticated(self):
+        """ Checks if a user is logged in """
+        return self.is_logged_in
+        
     
     def generate_reset_password_token(self):
         """Generates a reset password token"""
