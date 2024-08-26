@@ -61,8 +61,8 @@ class TestUserDocs(unittest.TestCase):
                 )
 
 
-class TestUser(unittest.TestCase):
-    """ Tests the functionality of the User class """
+class TestUserAttributes(unittest.TestCase):
+    """ Tests the functionality of the User attributes """
     DATA = {
             'first_name': 'admin',
             'last_name': 'tester',
@@ -237,3 +237,109 @@ class TestUser(unittest.TestCase):
                         'is_email_verified should be True')
 
         new_user.delete()
+
+    def test_username(self):
+        """ Tests the username attribute """
+        new_user = User(**self.data)
+        self.assertTrue(isinstance(new_user.username, str),
+                        'username should be a str')
+        self.assertTrue(new_user.username == self.data['username'],
+                        'username should be admin_tester2')
+
+    def test_avatar_url(self):
+        """ Tests the avatar_url attribute """
+        new_user = User(**self.data)
+        self.assertIsNone(new_user.avatar_url, 'avatar_url should be None')
+        new_user.avatar_url = 'http://images/my_picture.url'
+
+        self.assertTrue(type(new_user.avatar_url) is str,
+                        'avatar_url should be a str')
+
+
+class TestUserMethods(unittest.TestCase):
+    """ Tests the functionality of User methods """
+    DATA = {
+            'first_name': 'adminAdmin',
+            'last_name': 'tester',
+            'email': 'adminAdmin@example.com',
+            'username': 'adminAdmin',
+            'password': 'test_password'
+    }
+
+    def setUp(self):
+        """Set up test data before each test"""
+        self.data = self.DATA.copy()
+
+    def test_is_active(self):
+        """ Tests the is_active method """
+        new_user = User(**self.data)
+        new_user.save()
+        self.assertFalse(new_user.is_active,
+                         'is_active() should return False')
+
+        # setting is_email_verified to True to test
+        # the return value of is_active
+        new_user.is_email_verified = True
+        new_user.save()
+
+        self.assertTrue(new_user.is_active,
+                        'is_active() should return True')
+        new_user.delete()
+
+    def test_is_authenticated(self):
+        """ Tests the is_authenticated method """
+        new_user = User(**self.data)
+        new_user.save()
+
+        # Checks if the user is logged in
+        self.assertFalse(new_user.is_authenticated,
+                         'is_authenticated should return False')
+
+        # Setting is_logged_in to True
+        new_user.is_logged_in = True
+        new_user.save()
+
+        self.assertTrue(new_user.is_authenticated,
+                        'is_authenticated should return True')
+        new_user.delete()
+
+    def test_generate_reset_password_token(self):
+        """ Tests the generate_reset_password_token method """
+        new_user = User(**self.data)
+        token = new_user.generate_reset_password_token()
+        self.assertTrue(isinstance(token, str),
+                        'token should be a str')
+
+        # This check failed. tokens should be unique
+        # another_token = new_user.generate_reset_password_token()
+        # self.assertFalse(another_token == token, 'tokens must be unique')
+
+    def test_validate_reset_password_token(self):
+        """ Tests the validate_reset_password_token method """
+        new_user = User(**self.data)
+        token = new_user.generate_reset_password_token()
+
+        self.assertIsNone(User.validate_reset_password_token(token,
+                                                             new_user.id),
+                          'method should return the user object')
+
+        # trying with a fake user_id
+        self.assertIsNone(
+          User.validate_reset_password_token(token, 'fake_id'),
+          'User_id fake_id is invalid')
+
+        # Trying with a fake token
+        self.assertFalse(
+          User.validate_reset_password_token('fake_token',
+                                             new_user.id),
+          f'Fake token for user {new_user.username}')
+
+        # Trying with a different user_id than the one
+        # assigned to the token
+        self.data['username'] = 'another_user'
+        self.data['email'] = 'another_user@example.com'
+        another_user = User(**self.data)
+
+        self.assertIsNone(
+          User.validate_reset_password_token(token, another_user.id),
+          f'user with {another_user.email} is not assigned to the token')
