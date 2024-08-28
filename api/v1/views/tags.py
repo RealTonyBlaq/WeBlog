@@ -24,8 +24,9 @@ def view_tags(tag_id=None):
             return jsonify({'tag': tag.to_dict()}), 200
 
         # get all tags
-        response, code =  get_model_instances(Tag)
-        return jsonify(response), code
+        tags = db.query(Tag).all()
+        # response, code =  get_model_instances(Tag)
+        return jsonify({'tags': [tag.to_dict() for tag in tags]}), 200
 
 
 @app_views.route("/tags", methods=["POST"], strict_slashes=False)
