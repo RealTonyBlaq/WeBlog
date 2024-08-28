@@ -18,7 +18,7 @@ print(f"Loading .env file from: {dotenv_path}")
 load_dotenv(dotenv_path)
 
 
-classes = {User: "User", Post: "Post", Tag: "Tag", Comment: "Comment"}
+classes = {"User": User, "Post": Post, "Tag": Tag, "Comment": Comment}
 
 
 class Storage:
@@ -90,7 +90,7 @@ class Storage:
             if cls is None or cls is clas or cls is classes[clas]:
                 objs = self.__session.query(classes[clas]).all()
                 for obj in objs:
-                    key = obj.__class__.__name__ + '.' + obj.id
+                    key = f'{obj.__class__.__name__}.{obj.id}'
                     objs_dict[key] = obj
         return objs_dict
 

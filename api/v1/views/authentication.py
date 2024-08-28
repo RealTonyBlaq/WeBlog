@@ -1,7 +1,8 @@
 """Defines the Authentication routes"""
 from api.v1.views import app_views
+from datetime import datetime
 from bcrypt import gensalt, hashpw, checkpw
-from flask import jsonify, request, redirect, url_for, flash, render_template
+from flask import jsonify, request, redirect, url_for, flash, render_template, session
 from flask_login import login_user, logout_user, current_user
 from models.user import User
 from sqlalchemy.exc import IntegrityError
@@ -156,6 +157,10 @@ def login():
             user['bookmarks'] = [post.id for post in current_user.bookmarks]
             user['articles'] = [post.to_dict() for post in current_user.articles]
             return jsonify({'message': 'success', 'user': user}), 200
+            user.last_login = datetime.now() # Updates last_login time
+            user.is_logged_in = True # sets is_logged_in to be True. This could help determine the number of available users
+            user.save()
+            return jsonify({'message': 'success', 'user': user.to_dict()}), 200
         return jsonify({'message': 'Please complete email verification'}), 401
     else:
         return jsonify({'message': 'Invalid credentials'}), 401
@@ -164,7 +169,14 @@ def login():
 @app_views.route('/logout', methods=['POST'], strict_slashes=False)
 def logout():
     """Logs out a user from the session"""
+    if not current_user.is_authenticated:
+        flash('User not logged in', 'Not logged in')
+        return jsonify({'message': 'User not logged in'}), 401
+
+    current_user.is_logged_in = False
+    current_user.save()
     logout_user()
+    session.clear() # Clears all session cookies for the user
     return jsonify({'message': 'Logged out successfully'}), 200
 
 

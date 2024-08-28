@@ -7,6 +7,9 @@ from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from models.associations import user_post, user_tag, user_post_likes
 from models.base import BaseClass, Base
+from models.post import Post
+from models.tag import Tag
+from models.comment import Comment
 
 
 class User(UserMixin, BaseClass, Base):
@@ -17,6 +20,7 @@ class User(UserMixin, BaseClass, Base):
     email = Column(String(60), nullable=False, unique=True)
     last_login = Column(DateTime, default=datetime.now())
     password = Column(String(60), nullable=False)
+    is_logged_in = Column(Boolean, default=False)
     is_email_verified = Column(Boolean, default=False)
     username = Column(String(25), nullable=True, unique=True)
     avatar_url = Column(String(100), nullable=True)
@@ -28,12 +32,17 @@ class User(UserMixin, BaseClass, Base):
                              back_populates='bookmarked_by')
     interested_subjects = relationship('Tag', secondary=user_tag,
                                        back_populates='authors')
-    
+
     @property
     def is_active(self):
         """Checks whether a user is active"""
         return self.is_email_verified
-    
+
+    @property
+    def is_authenticated(self):
+        """ Checks if a user is logged in """
+        return self.is_logged_in
+
     def generate_reset_password_token(self):
         """Generates a reset password token"""
         from api.v1.app import app
@@ -58,7 +67,7 @@ class User(UserMixin, BaseClass, Base):
                     token, salt=user.password,
                     max_age=3600
                 )
-        except:
+        except Exception:
             return False
         if token_email != user.email:
             return None
