@@ -35,7 +35,6 @@ def profile():
         user = current_user.to_dict()
         user['tags'] = [tag.id for tag in current_user.interested_subjects]
         user['bookmarks'] = [post.id for post in current_user.bookmarks]
-        user['liked'] = [post.id for post in current_user.liked]
         user['articles'] = [post.to_dict() for post in current_user.articles]
         return jsonify({'user': user, 'status': 'success'})
 
@@ -97,7 +96,11 @@ def profile():
             return jsonify({'message': f'{f}'})
 
         msg = 'Profile updated successfully.'
-        return jsonify({'message': msg, 'user': current_user.to_dict()}), 200
+        user = current_user.to_dict()
+        user['tags'] = [tag.id for tag in current_user.interested_subjects]
+        user['bookmarks'] = [post.id for post in current_user.bookmarks]
+        user['articles'] = [post.to_dict() for post in current_user.articles]
+        return jsonify({'message': msg, 'user': user}), 200
     
     if request.method == 'DELETE':
         # delete user
@@ -133,7 +136,11 @@ def my_posts(post_id=None):
             article = db.query(Post).filter(Post.id == post_id).first()
             if not article:
                 return jsonify({'message': f'Post with id-{post_id} not found'}), 404
-            return jsonify({'post': article.to_dict()}), 200
+            article_dict = article.to_dict()
+            article_dict['no_of_comments'] = len(article.comments)
+            article_dict['no_of_bookmarks'] = len(article.bookmarked_by)
+            article_dict['tag_ids'] = [tag.name for tag in article.tags]
+            return jsonify({'post': article_dict}), 200
         
         # return all articles by this user
         # get page number
@@ -149,7 +156,7 @@ def my_posts(post_id=None):
         for article in current_user.articles:
             new_obj = article.to_dict()
             new_obj['no_of_comments'] = len(article.comments)
-            new_obj['no_of_likes'] = len(article.likes)
+            new_obj['no_of_bookmarks'] = len(article.bookmarked_by)
             new_obj['tags'] = [tag.name for tag in article.tags]
             my_articles.append(new_obj)
         count = len(my_articles)
@@ -343,6 +350,8 @@ def my_tags(tag_id=None):
                         'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
 
 
+@app_views.route('/me/bookmarks',
+                 methods=['GET'], strict_slashes=False)
 @app_views.route('/me/bookmarks/<post_id>',
                  methods=['POST', 'DELETE'], strict_slashes=False)
 @login_required
@@ -353,7 +362,15 @@ def my_bookmarks(post_id=None):
     DELETE - deletes a post from a user's bookmarks
     """
     if request.method == 'GET':
-        return jsonify({'bookmarks': [post.to_dict() for post in current_user.bookmarks]}), 200
+        bookmarks = current_user.bookmarks
+        bookmarks_list = []
+        for article in bookmarks:
+            new_obj = article.to_dict()
+            new_obj['no_of_comments'] = len(article.comments)
+            new_obj['no_of_bookmarks'] = len(article.bookmarked_by)
+            new_obj['tags'] = [tag.name for tag in article.tags]
+            bookmarks_list.append(new_obj)
+        return jsonify({'bookmarks': bookmarks_list}), 200
     
     if request.method == 'POST':
         post = db.query(Post).filter(Post.id == post_id).first()
@@ -365,11 +382,11 @@ def my_bookmarks(post_id=None):
             current_user.bookmarks.append(post)
             current_user.save()
         except IntegrityError:
-            return jsonify({'message': 'Database integrity error'})
+            return jsonify({'message': 'Database integrity error'}), 400
         
         msg = 'Post has been added to your bookmarks.'
         return jsonify({'message': msg,
-                        'posts': [post.to_dict() for post in current_user.bookmarks]}), 200
+                        'posts': [post.id for post in current_user.bookmarks]}), 200
 
     if request.method == 'DELETE':
         post = db.query(Post).filter(Post.id == post_id).first()
@@ -386,47 +403,4 @@ def my_bookmarks(post_id=None):
         
         msg = 'post has been removed from your bookmarks.'
         return jsonify({'message': msg,
-                        'posts': [post.to_dict() for post in current_user.bookmarks]}), 200
-
-
-@app_views.route('/me/liked_articles/<post_id>',
-                 methods=['POST', 'DELETE'], strict_slashes=False)
-@login_required
-def my_liked_article(post_id=None):
-    """
-    ** API endpoint for a user's liked_articles ***
-    PUT - adds a post to a user's liked_articles
-    DELETE - deletes a post from a user's liked_articles
-    """
-    if request.method == 'POST':
-        post = db.query(Post).filter(Post.id == post_id).first()
-        
-        if not post:
-            return jsonify({'message': f'Post wit id-{post_id} not found'}), 404
-        
-        try:
-            current_user.liked.append(post)
-            current_user.save()
-        except IntegrityError:
-            return jsonify({'message': 'Database integrity error'})
-        
-        msg = 'Post has been added to your list.'
-        return jsonify({'message': msg,
-                        'posts': [post.to_dict() for post in current_user.liked]}), 200
-
-    if request.method == 'DELETE':
-        post = db.query(Post).filter(Post.id == post_id).first()
-        
-        if not post:
-            return jsonify({'message': f'Tag wit id-{post_id} not found'}), 404
-        
-        try:
-            new_list = list(filter(lambda x: x.id != post_id, current_user.liked))
-            current_user.liked = new_list
-            current_user.save()
-        except IntegrityError:
-            return jsonify({'message': 'Database integrity error'})
-        
-        msg = 'Post has been removed from your list.'
-        return jsonify({'message': msg,
-                        'posts': [post.to_dict() for post in current_user.liked]}), 200
+                        'posts': [post.id for post in current_user.bookmarks]}), 200
