@@ -152,6 +152,11 @@ def login():
         if login_user(user=user):
             # redirect user to home page
             # return redirect('/')
+            user = current_user.to_dict()
+            user['tags'] = [tag.id for tag in current_user.interested_subjects]
+            user['bookmarks'] = [post.id for post in current_user.bookmarks]
+            user['articles'] = [post.to_dict() for post in current_user.articles]
+            return jsonify({'message': 'success', 'user': user}), 200
             user.last_login = datetime.now() # Updates last_login time
             user.is_logged_in = True # sets is_logged_in to be True. This could help determine the number of available users
             user.save()
@@ -232,10 +237,9 @@ def send_password_reset_mail():
         return jsonify({'message': f'User with {email} does not exist'}), 404
     
     # send reset email
-    reset_url = url_for('app_views.reset_password',
-                          token=user.generate_reset_password_token(),
-                          user_id=user.id,
-                          _external=True)
+    base_url = url_for('home', _external=True)
+    route_url = f'reset_password/{user.generate_reset_password_token()}/{user.id}'
+    reset_url = base_url + route_url
     content = f"""Dear {user.first_name} {user.last_name},
 
         You are receiving this email because you requested a password reset. \
@@ -245,7 +249,7 @@ def send_password_reset_mail():
 
         <a href="{reset_url}" style="display: inline-block; padding: \
         10px 20px; background-color: #007bff; color: #fff; text-decoration: \
-        none; border-radius: 5px; position: absolute;">Verify Your Account</a>
+        none; border-radius: 5px; position: absolute;">Reset Your Password</a>
 
         </div>
 

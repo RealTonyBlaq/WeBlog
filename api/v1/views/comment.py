@@ -121,6 +121,11 @@ def modify_comments(post_id, comment_id=None):
         msg = 'Comment created.'
         comment_dict = comment.to_dict()
         del comment_dict['parent']
+        comment_dict['author'] =  {'first_name': current_user.first_name,
+                                   'last_name': current_user.last_name,
+                                   'id': current_user.id,
+                                   'avatar_url': current_user.avatar_url,
+                                   'email': current_user.email}
         return jsonify({'message': msg, 'comment': comment_dict}), 201
     
     if request.method == "PATCH":
@@ -165,11 +170,13 @@ def modify_comments(post_id, comment_id=None):
         return jsonify({'message': msg, 'comment': comment.to_dict()}), 200
     
     if request.method == 'DELETE':
+        from sqlalchemy import and_
         # delete comment
         comment = db.query(Comment).filter(
-            Comment.id == comment_id and Comment.post_id == post_id and Comment.author_id == user_id).first()
+            and_(Comment.id == comment_id, Comment.author_id == user_id)).first()
         if not comment:
             return jsonify({'message': f'Post-{post_id} with Comment-{comment_id} not found'}), 404
         
         comment.delete()
-        return jsonify({}), 200
+        msg = 'Comment deleted successfully.'
+        return jsonify({'message': msg}), 200

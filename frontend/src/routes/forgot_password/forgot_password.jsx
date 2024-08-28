@@ -10,9 +10,7 @@ export default function ForgotPassword() {
 
   const submitFormHandler = async (values) => {
     console.log(values);
-    mutate({
-      email: values.email,
-    })
+    mutate(values.email)
   };
 
   return (

@@ -1,18 +1,15 @@
 """WeBlog Flask Application"""
 from api.v1.views import app_views
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, g, jsonify, request, abort, render_template
+from flask import Flask, g, jsonify, render_template
 from flask.sessions import SecureCookieSessionInterface
-from flask_login import LoginManager # for managing authentication
-from flask_login import login_required, user_loaded_from_request
+from flask_login import LoginManager, user_loaded_from_request
 from flask_cors import CORS
 from flask_executor import Executor
 from models.user import User
 from os import getenv
 from utils import db
-from utils.uploads import allowed_file
-from werkzeug.utils import secure_filename
-import os
+
 
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
@@ -24,7 +21,7 @@ app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['SESSION_COOKIE_HTTPONLY'] = True,
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True,
 # app.config['SESSION_COOKIE_SAMESITE'] = "Strict",
-app.config['ALLOWED_EXTENSIONS'] = ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif']
+app.config['ALLOWED_EXTENSIONS'] = ['.png', '.jpg', '.jpeg', '.gif']
 app.config['UPLOAD_FOLDER'] = getenv('UPLOAD_FOLDER')
 # MAIL SERVER CONFIG
 # app.config['MAIL_SERVER'] = 'live.smtp.mailtrap.io'
@@ -74,33 +71,7 @@ def load_user(user_id):
 @login_manager.unauthorized_handler
 def null_user():
     """Returns null"""
-    return jsonify({'user': None, 'status': 'user not authenticated'}), 404
-
-
-@app.route('/image_uploads/<type>', methods=['POST'], strict_slashes=False)
-@login_required
-def upload_avatar(type):
-    """
-    stores an image and returns the url
-    """
-    if type != 'avatars' or type != 'headers':
-        abort(404)
-    if 'file' not in request.files:
-        return jsonify({'message': 'No file selected'}), 400
-    
-    uploaded_file = request.files['file']
-    if uploaded_file.filename == "":
-        return jsonify({'message': 'No file selected'}), 400
-    
-    if uploaded_file and allowed_file(uploaded_file.filename):
-        filename = secure_filename(uploaded_file.filename)
-        path = os.path.join(f"assets/{type}", filename)
-        try:
-            uploaded_file.save(path)
-        except Exception as e:
-            return jsonify({'message': e}), 400
-        return jsonify({'message': 'File saved successfully', 'url': path}), 201
-    abort(400)
+    return jsonify({'user': None, 'status': 'user not authenticated'}), 401
 
 
 @app.teardown_appcontext

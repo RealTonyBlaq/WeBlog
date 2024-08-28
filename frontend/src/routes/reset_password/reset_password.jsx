@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Bars } from "react-loader-spinner";
 import { Form, Formik } from "formik";
 import { resetPasswordSchema } from "../../lib/utils";
@@ -7,7 +7,7 @@ import { useResetPassword } from "../../api/auth";
 
 export default function ResetPassword() {
   const url = window.location.href;
-  console.log(url);
+  // console.log(url);
   const { mutate, isLoading } = useResetPassword();
 
   const submitFormHandler = async (values) => {
