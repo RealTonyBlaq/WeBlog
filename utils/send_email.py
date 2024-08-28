@@ -12,14 +12,15 @@ def send_confirmation_email(to, subject, template):
     #     html=template, sender=app.config['MAIL_DEFAULT_SENDER']
     # )
     # mail.send(msg)
-    yag = yagmail.SMTP(app.config['MAIL_DEFAULT_SENDER'], app.config['MAIL_PASSWORD'])
+    yag = yagmail.SMTP(app.config['MAIL_DEFAULT_SENDER'],
+                       app.config['MAIL_PASSWORD'])
 
     try:
-            # Send a test email
-            yag.send(to=to, subject=subject, contents=template)
+        # Send a test email
+        yag.send(to=to, subject=subject, contents=template)
 
-            # Close connection.
-            yag.close()
-            return True
+        # Close connection.
+        yag.close()
+        return True
     except yagmail.error.YagInvalidEmailAddress:
         return False
