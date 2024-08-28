@@ -54,7 +54,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="relative w-full flex items-center justify-between px-6 py-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 dark:text-white dark:bg-dark-navy-blue text-arsenic bg-white">
+    <header className="sticky top-0 left-0 z-[999] shadow-lg w-full flex items-center justify-between px-6 py-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 dark:text-white dark:bg-dark-navy-blue text-arsenic bg-white">
       <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl flex items-center justify-between">
         <div className="w-full flex gap-4 items-center">
           {/* WeBlog Logo */}
@@ -86,28 +86,58 @@ export default function Header() {
         {/* WeBlog Menu */}
         <div className="w-full px-4 py-12 ">
           <SearchBar />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        {user ? (
+          {user ? (
           <>
             <Link
-              to={"/create_post"}
+              to={"/dashboard/create_post"}
               className="hidden lg:block px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
             >
               Create Post
             </Link>
-            <div className="">
-              <p
-                onClick={openUserMenu}
-                className="w-10 md:w-12 h-10 md:h-12 p-2 md:p-3 font-semibold bg-arsenic dark:bg-white text-white dark:text-arsenic rounded-full cursor-pointer"
-              >
-                {`${user.first_name[0]}${user.last_name[0]}`}
-              </p>
+          </>
+        ) : (
+          <>
+            <Link
+              to={"/signup"}
+              className="hidden lg:block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+            >
+              Signup
+            </Link>
+            <Link
+              to={"/login"}
+              className="hidden lg:block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+            >
+              Login
+            </Link>
+          </>
+        )}
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        {user ? (
+          <>
+            <Link
+              to={"/dashboard/create_post"}
+              className="hidden lg:block px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+            >
+              Create Post
+            </Link>
+            <div onClick={openUserMenu} className="">
+              {user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt="user avatar"
+                  className="w-10 md:w-12 h-10 md:h-12 rounded-full cursor-pointer"
+                />
+              ) : (
+                <p className="w-10 flex items-center justify-center md:w-12 h-10 md:h-12 p-2 md:p-3 font-semibold bg-arsenic dark:bg-white text-white dark:text-arsenic rounded-full cursor-pointer">
+                  {`${user.first_name[0]}${user.last_name[0]}`}
+                </p>
+              )}
               {/* User Dropdown */}
               {showUserMenu ? (
                 <div
+                  onClick={closeUserMenu}
                   ref={ref}
                   className="min-w-60 z-50 grid gap-2 absolute top-[80px] md:top-[88px] right-4 p-4 bg-white dark:bg-dark-navy-blue/75 rounded-xl shadow-lg"
                 >
@@ -122,10 +152,10 @@ export default function Header() {
                     <Link to={"/dashboard"} className="block p-1 ">
                       Dashboard
                     </Link>
-                    <Link to={"/dashboard"} className="block p-1 ">
+                    <Link to={"/dashboard/create_post"} className="block p-1 ">
                       Create Post
                     </Link>
-                    <Link to={"/bookmarks"} className="block p-1 ">
+                    <Link to={"/dashboard/my_bookmarks"} className="block p-1 ">
                       Bookmarks
                     </Link>
                   </div>
@@ -134,9 +164,10 @@ export default function Header() {
                     onClick={async () => {
                       const data = await logout();
                       const response = await data.json();
-                      setMenu(false)
+                      setMenu(false);
                       toast(response.message);
-                      setUser(null)
+                      setUser(null);
+                      localStorage.removeItem('user');
                       navigate("/");
                     }}
                     className="block p-1 cursor-pointer"
