@@ -29,7 +29,10 @@ class Comment(BaseClass, Base):
         from utils import db
         super().__init__(*args, **kwargs)
         last_comment = db.query(Comment).order_by(Comment.id.desc()).first()
-        self.id =  last_comment.id + 1
+        if last_comment:
+            self.id =  last_comment.id + 1
+        else:
+            self.id =  1
 
     def __str__(self):
         """String representation of the BaseModel class"""
