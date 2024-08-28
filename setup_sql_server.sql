@@ -1,4 +1,4 @@
--- Sets up the SQL server for the 
+-- Sets up the SQL server for the Project
 DROP DATABASE IF EXISTS weblog;
 CREATE DATABASE IF NOT EXISTS weblog;
 CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Password123';
