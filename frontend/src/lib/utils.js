@@ -100,3 +100,12 @@ export const changePasswordSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Mismatched passwords")
     .required("Please confirm your password"),
 });
+
+export const postSchema = yup.object().shape({
+  title: yup.string().min(8).required("Title is required"),
+  body: yup.string().min(100).required("Body is required"),
+});
+
+export const commentSchema = yup.object().shape({
+  content: yup.string().min(8).required("Content is required"),
+});
