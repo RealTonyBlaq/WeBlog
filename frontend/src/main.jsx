@@ -17,64 +17,133 @@ import MyBookmarksPage from "./routes/my_bookmarks/my_bookmarks";
 import MyProfilePage from "./routes/my_profile/my_profile";
 import EditMyProfile from "./routes/edit_profile/edit_profile";
 import ChangeMyPassword from "./routes/change_password/change_pasword";
+import MyTagsPage from "./routes/my_tags/my_tags";
+import CreatePostPage from "./routes/create_posts/create_post";
+import HomePage from "./routes/home/home";
+import LatestPostsPage from "./routes/latest/latest";
+import RenderPostMarkDown from "./routes/post/post";
+import EditPostPage from "./routes/edit_posts/edit_posts";
+import ErrorPage from "./error-page";
+import QueryPostsPage from "./routes/search/search";
+// loaders
+import { loader as HomeLoader } from "./routes/home/loader";
+import { loader as PostLoader } from "./routes/post/loader";
+import { loader as TagsLoader } from "./routes/create_posts/loader";
+import { loader as myPostsLoader } from "./routes/my_posts/loader";
+import { loader as editPostLoader } from "./routes/edit_posts/loader";
+import { loader as bookmarksLoader } from "./routes/my_bookmarks/loader";
+import { loader as searchLoader } from "./routes/search/loader";
+// actions
+import { action as DeletePost } from "./routes/delete_post/action";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AuthProvider><GeneralLayout /></AuthProvider>,
-    errorElement: <div>Oops, error</div>,
+    element: (
+      <AuthProvider>
+        <GeneralLayout />
+      </AuthProvider>
+    ),
+    errorElement: <ErrorPage />,
     children: [
       {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/signup",
-        element: <SignUp />,
-      },
-      {
-        path: "/forgot-password",
-        element: <ForgotPassword />,
-      },
-      {
-        path: "/reset_password/:token/:user_id",
-        element: <ResetPassword />,
-      },
-      {
-        path: "/resend_conf_email",
-        element: <ResendConfirmationEmail />,
-      },
-      {
-        path: "/dashboard",
-        element: <DashBoard />,
+        path: "/",
+        element: <HomePage />,
         children: [
           {
             errorElement: <div>Oops....Page not found</div>,
             children: [
               {
-                index: true, element: <MyProfilePage />
+                index: true,
+                element: <LatestPostsPage />,
+                loader: HomeLoader,
+              },   
+            ],
+          },
+        ],
+      },
+      {
+        path: "search",
+        element: <QueryPostsPage />,
+        loader: searchLoader
+      },
+      {
+        path: "posts/:id",
+        element: <RenderPostMarkDown />,
+        loader: PostLoader,
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "signup",
+        element: <SignUp />,
+      },
+      {
+        path: "forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "reset_password/:token/:user_id",
+        element: <ResetPassword />,
+      },
+      {
+        path: "resend_conf_email",
+        element: <ResendConfirmationEmail />,
+      },
+      {
+        path: "dashboard",
+        element: <DashBoard />,
+        children: [
+          {
+            errorElement: <ErrorPage />,
+            children: [
+              {
+                index: true,
+                element: <MyProfilePage />,
+              },
+              {
+                path: "create_post",
+                element: <CreatePostPage />,
+                loader: TagsLoader
               },
               {
                 path: "edit_profile",
-                element: <EditMyProfile />
+                element: <EditMyProfile />,
               },
               {
                 path: "change_password",
-                element: <ChangeMyPassword />
+                element: <ChangeMyPassword />,
               },
               {
                 path: "my_posts",
-                element: <MyPostsPage />
+                element: <MyPostsPage />,
+                loader: myPostsLoader
+              },
+              {
+                path: "my_posts/:id/delete",
+                action: DeletePost,
+              },
+              {
+                path: "my_posts/:id/edit",
+                element: <EditPostPage />,
+                loader: editPostLoader
               },
               {
                 path: "my_bookmarks",
-                element: <MyBookmarksPage />
-              }
-            ]
-          }
-        ]
+                element: <MyBookmarksPage />,
+                loader: bookmarksLoader
+              },
+              {
+                path: "my_tags",
+                element: <MyTagsPage />,
+              },
+            ],
+          },
+        ],
       },
     ],
   },
