@@ -17,7 +17,6 @@ import MyBookmarksPage from "./routes/my_bookmarks/my_bookmarks";
 import MyProfilePage from "./routes/my_profile/my_profile";
 import EditMyProfile from "./routes/edit_profile/edit_profile";
 import ChangeMyPassword from "./routes/change_password/change_pasword";
-import MyTagsPage from "./routes/my_tags/my_tags";
 import CreatePostPage from "./routes/create_posts/create_post";
 import HomePage from "./routes/home/home";
 import LatestPostsPage from "./routes/latest/latest";
@@ -136,10 +135,6 @@ const router = createBrowserRouter([
                 path: "my_bookmarks",
                 element: <MyBookmarksPage />,
                 loader: bookmarksLoader
-              },
-              {
-                path: "my_tags",
-                element: <MyTagsPage />,
               },
             ],
           },
