@@ -14,7 +14,10 @@ from utils import db
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-app = Flask(__name__, static_folder="../../frontend/dist/assets", template_folder="../../frontend/dist")
+app = Flask(__name__,
+            static_folder="../../frontend/dist/assets",
+            template_folder="../../frontend/dist")
+
 app.config['SECRET_KEY'] = getenv('SECRET_KEY')
 app.config['SECURITY_PASSWORD_SALT'] = getenv('SECURITY_PASSWORD_SALT')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
@@ -32,7 +35,6 @@ app.config['MAIL_PASSWORD'] = getenv('MAIL_PASSWORD')
 # app.config['MAIL_USE_TLS'] = True
 # app.config['MAIL_USE_SSL'] = False
 
-
 login_manager = LoginManager()
 login_manager.init_app(app=app)
 app.register_blueprint(app_views)
@@ -40,7 +42,9 @@ app.register_blueprint(app_views)
 # mail = Mail(app=app)
 executor = Executor(app=app)
 
-cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}}, supports_credentials=True)
+cors = CORS(app,
+            resources={r"/api/v1/*": {"origins": "*"}},
+            supports_credentials=True)
 
 
 # disable setting of Flask's Session cookie
@@ -60,6 +64,7 @@ class CustomSessionInterface(SecureCookieSessionInterface):
         return super(CustomSessionInterface, self).save_session(*args,
                                                                 **kwargs)
 
+
 app.session_interface = CustomSessionInterface()
 
 
@@ -68,10 +73,12 @@ def load_user(user_id):
     """Loads a user from session using the user's id"""
     return db.query(User).filter(User.id == user_id).first()
 
+
 @login_manager.unauthorized_handler
 def null_user():
     """Returns null"""
-    return jsonify({'user': None, 'status': 'user not authenticated'}), 401
+    return jsonify({'user': None,
+                    'status': 'user not authenticated'}), 401
 
 
 @app.teardown_appcontext
