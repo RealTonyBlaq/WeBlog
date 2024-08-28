@@ -8,7 +8,7 @@ import errorHandler from "../lib/errorHandler";
 ////////////////////---API CALLS---/////////////////////
 ////////////////////////////////////////////////////////
 
-const baseURL = import.meta.env.VITE_BASE_URL;
+export const baseURL = import.meta.env.VITE_BASE_URL;
 
 const postFetch = async (fetchURL, payload) =>
   await fetch(`${baseURL + fetchURL}`, {
@@ -25,6 +25,15 @@ export const getProfile = async () => {
   return data;
 };
 
+export const updateProfile = async (payload) => {
+  try {
+    const { data } = await Axios.patch("/api/v1/me", payload);
+    return data;
+  } catch (e) {
+    errorHandler(e);
+  }
+};
+
 const signup = async (payload) => {
   const data = await fetch(`${baseURL}/api/v1/signup`, {
     method: "POST",
@@ -33,12 +42,12 @@ const signup = async (payload) => {
       "Content-Type": "application/json",
     },
     credentials: "include",
-  })
+  });
   return await data.json();
 };
 
 export const loginWithEmail = async (payload) => {
-  const data = await postFetch('/api/v1/login', payload)
+  const data = await postFetch("/api/v1/login", payload);
   const response = await data.json();
   if (data.ok)
     return { status: data.ok, message: response.message, user: response.user };
@@ -48,7 +57,7 @@ export const loginWithEmail = async (payload) => {
 export const logout = async () => {
   const data = await fetch(`${baseURL}/api/v1/logout`, {
     method: "POST",
-    credentials: "include"
+    credentials: "include",
   });
   return data;
 };
@@ -60,7 +69,11 @@ const forgotPassword = async (email) => {
 
 // restructure later - done
 const resetPassword = async (payload) => {
-  const { data } = await Axios.post(payload.url, {
+  // console.log(payload.url);
+  // remove initial section of current url (http://localhost:5000) and append
+  // to /api/v1/ to get reset rpassword route
+  
+  const { data } = await Axios.post(`/api/v1/${payload.url.slice(21)}`, {
     password: payload.password,
     confirm_password: payload.confirm_password,
   });
@@ -77,7 +90,7 @@ const resendConfirmationEmail = async (email) => {
 ////////////////////////////////////////////////////////
 
 const home = "/";
-const dashboard = "/";
+// const dashboard = "/";
 export const useSignup = () => {
   const navigate = useNavigate();
   return useMutation(signup, {

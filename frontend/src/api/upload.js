@@ -1,3 +1,5 @@
+import toast from "react-hot-toast";
+
 const baseURL = import.meta.env.VITE_BASE_URL;
 
 export const handleImageUpload = async (type, file) => {    
@@ -13,10 +15,12 @@ export const handleImageUpload = async (type, file) => {
       });
 
       const data = await result.json();
-
-      console.log(data);
+      toast.success(data.message)
+      // console.log(data);
+      return data
     } catch (error) {
-      console.error(error);
+      // console.error(error);
+      toast.error(error.message)
     }
   }
 };
