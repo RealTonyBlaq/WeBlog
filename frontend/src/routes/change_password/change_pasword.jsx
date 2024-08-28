@@ -3,6 +3,8 @@ import { changePasswordSchema } from "../../lib/utils";
 import { useNavigate } from "react-router-dom";
 import { MyTextInput } from "../../ui/form-input";
 import { Bars } from "react-loader-spinner";
+import { updateProfile } from "../../api/auth";
+import toast from "react-hot-toast";
 
 export default function ChangeMyPassword() {
   // const { mutate: signup, isLoading: signupLoading } = useSignup();
@@ -12,14 +14,11 @@ export default function ChangeMyPassword() {
   // const isLoading = signupLoading;
 
   const submitFormHandler = async (values) => {
-    console.log(values);
-    //   signup({
-    //     first_name: values.first_name,
-    //     last_name: values.last_name,
-    //     email: values.email,
-    //     password: values.password,
-    //     confirm_password: values.confirm_password,
-    //   });
+    // console.log(values);
+    const response = await updateProfile(values)
+    if (response) {
+      toast.success(response.message)
+    }
   };
 
   const cancelEditHandler = () => {

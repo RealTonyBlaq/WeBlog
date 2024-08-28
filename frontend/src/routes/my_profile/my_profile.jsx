@@ -1,20 +1,38 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { handleImageUpload } from "../../api/upload";
+import { useAuth } from "../../lib/useAuth";
+import { Oval, TailSpin } from "react-loader-spinner";
+import { updateProfile } from "../../api/auth";
+import toast from "react-hot-toast";
 
 export default function MyProfilePage() {
+  const { user, setUser } = useAuth();
   const [file, setFile] = useState(null);
-  // const [avatar_url, setAvatar] = useState(null);
+  const [isLoading, setLoading] = useState(false);
 
-  const isLoading = false;
-  // const isLoading = signupLoading;
+  if (!user)
+    return (
+      <div className="w-full min-h-96 flex items-center justify-center">
+        <TailSpin
+          visible={true}
+          height="150"
+          width="150"
+          color="#4fa94d"
+          ariaLabel="tail-spin-loading"
+          radius="1"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      </div>
+    );
 
   const handleAvatarChange = async (e) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
     }
   };
-  const user = {};
+
   return (
     <div className="w-full">
       <p className="text-lg md:text-xl xl:text-2xl font-semibold pb-2 dark:text-white">
@@ -26,9 +44,15 @@ export default function MyProfilePage() {
             <div className="relative group w-16 md:w-24 lg:w-28 xl:w-32 h-16 md:h-24 lg:h-28 xl:h-32 mx-auto flex items-center justify-center text-white dark:text-arsenic text-xl md:text-2xl lg:text-3xl xl:text-4xl">
               {/* {`${user.first_name[0]}${user.last_name[0]}`} */}
               {user && user.avatar_url ? (
-                <img src="../../../../dist/assets/avatars/012.jpg" alt="user avatar" className="w-full h-full rounded-full" />
+                <img
+                  src={user.avatar_url}
+                  alt="user avatar"
+                  className="w-full h-full rounded-full"
+                />
               ) : (
-                <span className="w-full h-full flex items-center justify-center p-2 md:p-3 font-semibold bg-arsenic dark:bg-white rounded-full cursor-pointer">UA</span>
+                <span className="w-full h-full flex items-center justify-center p-2 md:p-3 font-semibold bg-arsenic dark:bg-white rounded-full cursor-pointer">
+                  UA
+                </span>
               )}
               <div className="absolute top-0 left-0 z-10 hidden w-full h-full backdrop-blur-sm dark:text-white rounded-full group-hover:block">
                 <label
@@ -62,34 +86,60 @@ export default function MyProfilePage() {
                 </li>
               </ul>
               <button
-                onClick={() => handleImageUpload("avatars", file)}
+                onClick={async () => {
+                  setLoading(true)
+                  const data = await handleImageUpload("avatars", file);
+                  if (data) {
+                    const response = await updateProfile({avatar_url: data.url})
+                    if (response) {
+                      toast.success(response.message)
+                      setUser(response.user)
+                      setFile(null)
+                    }
+                  }
+                  setLoading(false)
+                }}
                 type="button"
                 disabled={isLoading}
                 className={`w-32 py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg ${
                   !isLoading && "hover:bg-white hover:text-blue-500"
                 }`}
               >
-                Update Avatar
+                {isLoading ? (
+                  <Oval
+                  visible={true}
+                  height="16"
+                  width="16"
+                  color="#ffffff"
+                  ariaLabel="oval-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                  />
+                ) : (
+                  "Update Avatar"
+                )}
               </button>
             </section>
           ) : file && file.size > 1048576 ? (
             <div className="w-full">
               <p className="w-full text-sm text-center font-medium text-red-500">{`File size is too large ( > 1MB)`}</p>
-              <p className="w-full text-sm text-center font-medium text-red-500">Please select another file</p>
+              <p className="w-full text-sm text-center font-medium text-red-500">
+                Please select another file
+              </p>
             </div>
           ) : null}
           <div className="w-full grid md:grid-cols-2 gap-4 lg:gap-6 mt-4 md:mt-6">
             <div className="">
               <p className="">First Name</p>
-              <p className="font-medium">Ubonisrael</p>
+              <p className="font-medium">{user.first_name}</p>
             </div>
             <div className="">
               <p className="">Last Name</p>
-              <p className="font-medium">Akpanudoh</p>
+              <p className="font-medium">{user.last_name}</p>
             </div>
             <div className="">
               <p className="">Email</p>
-              <p className="font-medium">johndoe@example.com</p>
+              <p className="font-medium">{user.email}</p>
             </div>
             {/* <div className="">
               <p className="">Bio</p>

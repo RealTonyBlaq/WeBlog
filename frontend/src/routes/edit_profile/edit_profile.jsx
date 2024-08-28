@@ -2,26 +2,40 @@ import { Form, Formik } from "formik";
 import { updateProfileSchema } from "../../lib/utils";
 import { useNavigate } from "react-router-dom";
 import { MyTextInput } from "../../ui/form-input";
-import { Bars } from "react-loader-spinner";
-
+import { Bars, TailSpin } from "react-loader-spinner";
+import { updateProfile } from "../../api/auth";
+import { useAuth } from "../../lib/useAuth";
+import { useState } from "react";
 
 export default function EditMyProfile() {
-  // const { mutate: signup, isLoading: signupLoading } = useSignup();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setLoading] = useState(false);
 
-  const isLoading = false;
-  // const isLoading = signupLoading;
+  if (!user)
+    return (
+      <div className="w-full min-h-96 flex items-center justify-center">
+        <TailSpin
+          visible={true}
+          height="150"
+          width="150"
+          color="#4fa94d"
+          ariaLabel="tail-spin-loading"
+          radius="1"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      </div>
+    );
 
   const submitFormHandler = async (values) => {
-    console.log(values);
-
-    //   signup({
-    //     first_name: values.first_name,
-    //     last_name: values.last_name,
-    //     email: values.email,
-    //     password: values.password,
-    //     confirm_password: values.confirm_password,
-    //   });
+    setLoading(true)
+    const response = await updateProfile(values);
+    if (response) {
+      setUser(response.user);
+      navigate("/dashboard");
+    }
+    setLoading(false)
   };
 
   const cancelEditHandler = () => {
@@ -29,14 +43,15 @@ export default function EditMyProfile() {
       navigate("/dashboard");
     }
   };
+
   return (
     <div className="w-full bg-white dark:bg-dark-navy-blue p-4 md:p-8 xl:p-12 rounded-lg">
       <div className="w-full md:px-8">
         <Formik
           initialValues={{
-            first_name: "bruce",
-            last_name: "wayne",
-            email: "jd@gmail.com",
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
           }}
           validationSchema={updateProfileSchema}
           onSubmit={(values, { setSubmitting }) => {
@@ -65,12 +80,6 @@ export default function EditMyProfile() {
                   type="email"
                   placeholder="oowoga@gmail.com.com"
                 />
-                {/* <MyTextInput
-                  label="Bio"
-                  name="bio"
-                  type="text"
-                  placeholder="A bri"
-                /> */}
                 <div className="w-full flex items-center justify-center gap-2">
                   <button
                     type="submit"
