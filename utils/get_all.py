@@ -46,8 +46,9 @@ def get_model_instances(model, filter=None, filter_id=None):
         new_obj = obj.to_dict()
         if new_obj.get('__class__') == 'Post':
             new_obj['author'] = f"{obj.author.first_name} {obj.author.last_name}"
+            new_obj['author_avatar'] = obj.author.avatar_url
             new_obj['no_of_comments'] = len(obj.comments)
-            new_obj['no_of_likes'] = len(obj.likes)
+            new_obj['no_of_likes'] = len(obj.bookmarked_by)
             new_obj['tags'] = [tag.name for tag in obj.tags]
         objs_list.append(new_obj)
 
