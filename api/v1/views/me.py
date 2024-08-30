@@ -21,7 +21,7 @@ def profile():
     ** API endpoint for a user's profile ***
     GET - returns a user's profile
     PUT - updates a user's profile
-    DELETE - deletes a user 
+    DELETE - deletes a user
     """
     allowed_attributes = [
         "avatar_url",
@@ -43,12 +43,12 @@ def profile():
     if request.method == "PATCH":
         if not request.is_json:
             return jsonify({'message': 'Not a valid JSON'}), 400
-    
+
         try:
             data = request.get_json()
         except BadRequest:
             return jsonify({'message': 'Not a valid JSON'}), 400
-    
+
         if not data:
             return jsonify({'message': 'Empty dataset'}), 400
 
@@ -73,7 +73,8 @@ def profile():
                 continue
             # make sure to only update attributes
             if k not in allowed_attributes:
-                return jsonify({'message': f'Cannot update attribute - {k}'}), 400
+                return jsonify({'message': f'Cannot update \
+                    attribute - {k}'}), 400
             if k == 'email':
                 # check if login is fresh
                 if not login_fresh():
@@ -83,13 +84,17 @@ def profile():
                 #     return jsonify({'message': 'Invalid email'}), 400
                 # make sure no other user is using that email
                 another_user = db.query(User).filter(User.email == v).first()
-                if another_user and another_user.id != current_user.get_id():
-                    return jsonify({'message': f'Cannot update attribute - {k}, {v} already in use'}), 400
-                
+                if (another_user and another_user.id !=
+                   current_user.get_id()):
+                    return jsonify({'message': f'Cannot update attribute - \
+                        {k}, {v} already in use'}), 400
+
             if len(v.strip()) == 0:
                 return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
-            setattr(current_user, k, hashed_password if k == 'password' else v.strip())
+            setattr(current_user,
+                    k,
+                    hashed_password if k == 'password' else v.strip())
 
         # save changes
         try:
@@ -104,7 +109,7 @@ def profile():
         # user['articles'] = [post.to_dict() for post in current_user.articles]
         user['liked_comments'] = [comment.id for comment in current_user.liked_comments]
         return jsonify({'message': msg, 'user': user}), 200
-    
+
     if request.method == 'DELETE':
         # delete user
         current_user.delete()
@@ -138,13 +143,14 @@ def my_posts(post_id=None):
             # this returns an article
             article = db.query(Post).filter(Post.id == post_id).first()
             if not article:
-                return jsonify({'message': f'Post with id-{post_id} not found'}), 404
+                return jsonify({'message': f'Post with id-{post_id} \
+                    not found'}), 404
             article_dict = article.to_dict()
             article_dict['no_of_comments'] = len(article.comments)
             article_dict['no_of_bookmarks'] = len(article.bookmarked_by)
             article_dict['tag_ids'] = [tag.name for tag in article.tags]
             return jsonify({'post': article_dict}), 200
-        
+
         # return all articles by this user
         # get page number
         page = request.args.get('page', type=int, default=1)
@@ -154,7 +160,7 @@ def my_posts(post_id=None):
         if page < 1 or limit < 1:
             return ({'message': 'Page number\
                      or limit should not be less than 1'}, 400)
-    
+
         my_articles = []
         for article in current_user.articles:
             new_obj = article.to_dict()
@@ -170,19 +176,19 @@ def my_posts(post_id=None):
 
         return ({'data': my_articles, 'page': f'{page}',
                  'total_pages': f"{total_pages}"}, 200)
-    
+
     if request.method == 'POST':
         if not request.is_json:
             return jsonify({'message': 'Not a valid JSON'}), 400
-    
+
         try:
             data = request.get_json()
         except BadRequest:
             return jsonify({'message': 'Not a valid JSON'}), 400
-    
+
         if not data:
             return jsonify({'message': 'Empty dataset'}), 400
-        
+
         header_url = data.get('header_url')
         title = data.get('title')
         body = data.get('body')
@@ -191,7 +197,7 @@ def my_posts(post_id=None):
             return jsonify({'message': 'Missing title'}), 400
         if not body and len(body) == 0:
             return jsonify({'message': 'Missing body'}), 400
-        
+
         post = Post(
             title=title, body=body,
             author_id=user_id, header_url=header_url
@@ -202,7 +208,7 @@ def my_posts(post_id=None):
 
         except IntegrityError:
             return jsonify({'message': 'Database integrity error'})
-        
+
         # add tags
         tag_ids = data.get('tag_ids')  # a list of tag_id's
         if tag_ids:
@@ -214,45 +220,47 @@ def my_posts(post_id=None):
                 if not tag:
                     return jsonify({'message': f'Tag-{tag_id} not found'}), 404
                 tags.append(tag)
-                
+
             try:
                 post.tags.extend(tags)
                 post.save()
             except IntegrityError:
                 db.rollback()
                 return jsonify({'message': 'Database error'})
-        
+
         post_dict = post.to_dict()
         if "tags" in post_dict:
             del post_dict['tags']
             post_dict["tags"] = [tag.name for tag in post.tags]
         msg = 'Post created.'
         return jsonify({'message': msg, 'post': post_dict}), 201
-    
+
     if request.method == 'PATCH':
         if not request.is_json:
             return jsonify({'message': 'Not a valid JSON'}), 400
-    
+
         try:
             data = request.get_json()
         except BadRequest:
             return jsonify({'message': 'Not a valid JSON'}), 400
-    
+
         if not data:
             return jsonify({'message': 'Empty dataset'}), 400
-        
+
         # only the author of a post should be able to update it
-        post = db.query(Post).filter(Post.id == post_id and Post.author_id == user_id).first()
+        post = db.query(Post).filter(Post.id == post_id and
+                                     Post.author_id == user_id).first()
 
         if not post:
             return jsonify({'message': f'Post with id-{post_id} \
                             belonging to {user_id} not found'}), 404
-        
+
         for k, v in data.items():
-        # make sure to only update attributes
+            # make sure to only update attributes
             if k not in allowed_attributes:
-                return jsonify({'message': f'Cannot update attribute - {k}'}), 400
-                
+                return jsonify({'message': f'Cannot update \
+                    attribute - {k}'}), 400
+
             if k != 'tag_ids' and len(v.strip()) == 0:
                 return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
@@ -264,7 +272,7 @@ def my_posts(post_id=None):
             post.save()
         except IntegrityError as f:
             return jsonify({'message': f'{f}'})
-        
+
         # update tags
         tag_ids = data.get('tag_ids')  # a list of tag_id's
         if tag_ids:
@@ -276,7 +284,7 @@ def my_posts(post_id=None):
                 if not tag:
                     return jsonify({'message': f'Tag-{tag_id} not found'}), 404
                 tags.append(tag)
-                
+
             try:
                 post.tags = tags
                 post.save()
@@ -290,15 +298,16 @@ def my_posts(post_id=None):
             post_dict["tags"] = [tag.name for tag in post.tags]
         msg = 'Post updated successfully.'
         return jsonify({'message': msg, 'post': post_dict}), 200
-    
+
     if request.method == 'DELETE':
         # delete post
-        post = db.query(Post).filter(Post.id == post_id and Post.author_id == user_id).first()
+        post = db.query(Post).filter(Post.id == post_id and
+                                     Post.author_id == user_id).first()
 
         if not post:
             return jsonify({'message': f'Post with id {post_id}\
                             belonging to {user_id} not found'}), 404
-        
+
         post.delete()
         return jsonify({}), 200
 
@@ -317,40 +326,46 @@ def my_tags(tag_id=None):
     """
     if request.method == 'GET':
         # find user
-        return jsonify({'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
-    
+        return jsonify({'tags': [tag.to_dict() for tag in
+                                 current_user.interested_subjects]}), 200
+
     if request.method == 'POST':
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
-        
+
         if not tag:
-            return jsonify({'message': f'Tag wit id-{tag_id} not found'}), 404
-        
+            return jsonify({'message': f'Tag wit id-{tag_id} \
+                not found'}), 404
+
         try:
             current_user.interested_subjects.append(tag)
             current_user.save()
         except IntegrityError:
             return jsonify({'message': 'Database integrity error'})
-        
+
         msg = 'Tag has been added to your list.'
         return jsonify({'message': msg,
-                        'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
+                        'tags': [tag.to_dict() for tag in
+                                 current_user.interested_subjects]}), 200
 
     if request.method == 'DELETE':
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
-        
+
         if not tag:
-            return jsonify({'message': f'Tag wit id-{tag_id} not found'}), 404
-        
+            return jsonify({'message': f'Tag wit id-{tag_id} \
+                not found'}), 404
+
         try:
-            new_list = list(filter(lambda x: x.id != tag_id, current_user.interested_subjects))
+            new_list = list(filter(lambda x: x.id != tag_id,
+                                   current_user.interested_subjects))
             current_user.interested_subjects = new_list
             current_user.save()
         except IntegrityError:
             return jsonify({'message': 'Database integrity error'})
-        
+
         msg = 'Tag has been removed from your list.'
         return jsonify({'message': msg,
-                        'tags': [tag.to_dict() for tag in current_user.interested_subjects]}), 200
+                        'tags': [tag.to_dict() for tag in
+                                 current_user.interested_subjects]}), 200
 
 
 @app_views.route('/me/bookmarks',
@@ -374,36 +389,40 @@ def my_bookmarks(post_id=None):
             new_obj['tags'] = [tag.name for tag in article.tags]
             bookmarks_list.append(new_obj)
         return jsonify({'bookmarks': bookmarks_list}), 200
-    
+
     if request.method == 'POST':
         post = db.query(Post).filter(Post.id == post_id).first()
-        
+
         if not post:
-            return jsonify({'message': f'Post wit id-{post_id} not found'}), 404
-        
+            return jsonify({'message': f'Post wit id-{post_id} \
+                not found'}), 404
+
         try:
             current_user.bookmarks.append(post)
             current_user.save()
         except IntegrityError:
             return jsonify({'message': 'Database integrity error'}), 400
-        
+
         msg = 'Post has been added to your bookmarks.'
         return jsonify({'message': msg,
-                        'posts': [post.id for post in current_user.bookmarks]}), 200
+                        'posts': [post.id for post in
+                                  current_user.bookmarks]}), 200
 
     if request.method == 'DELETE':
         post = db.query(Post).filter(Post.id == post_id).first()
-        
+
         if not post:
-            return jsonify({'message': f'Tag wit id-{post_id} not found'}), 404
-        
+            return jsonify({'message': f'Tag wit id-{post_id} \
+                not found'}), 404
+
         try:
-            new_list = list(filter(lambda x: x.id != post_id, current_user.bookmarks))
+            new_list = list(filter(lambda x: x.id != post_id,
+                                   current_user.bookmarks))
             current_user.bookmarks = new_list
             current_user.save()
         except IntegrityError:
             return jsonify({'message': 'Database integrity error'})
-        
+
         msg = 'post has been removed from your bookmarks.'
         return jsonify({'message': msg,
                         'posts': [post.id for post in current_user.bookmarks]}), 200
@@ -451,4 +470,4 @@ def my_comments(comment_id=None):
         
         msg = 'Comment successfully un-liked.'
         return jsonify({'message': msg,
-                        'comments': [comment.id for comment in current_user.bookmarks]}), 200
+                        'comments': [comment.id for comment in current_user.liked_comments]}), 200
