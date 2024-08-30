@@ -9,6 +9,8 @@ export default function DisplayPosts({ posts, fetchData }) {
   const [hasMore, setHasMore] = useState(
     Number(posts.page) < Number(posts.total_pages)
   );
+  console.log(displayedPosts);
+  
   const [page, setPage] = useState(2);
 
   const loadMorePosts = async (page) => {

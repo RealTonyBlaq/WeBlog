@@ -44,7 +44,7 @@ export default function PostCard({
     >
       {header_url ? (
         <img
-          src={header_url}
+          src={`/${header_url}`}
           alt="post image"
           className="w-full h-40 rounded-t-md"
         />
@@ -53,7 +53,7 @@ export default function PostCard({
         <div className="w-full">
           {author_avatar ? (
             <img
-              src={author_avatar}
+              src={`/${author_avatar}`}
               alt="author avatar"
               className="w-12 h-12 rounded-full"
             />
