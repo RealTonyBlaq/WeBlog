@@ -3,6 +3,7 @@ from api.v1.views import app_views
 from bcrypt import gensalt, hashpw
 from flask import jsonify, request
 from flask_login import login_required, current_user, login_fresh
+from models.comment import Comment
 from models.user import User
 from models.post import Post
 from models.tag import Tag
@@ -35,7 +36,8 @@ def profile():
         user = current_user.to_dict()
         user['tags'] = [tag.id for tag in current_user.interested_subjects]
         user['bookmarks'] = [post.id for post in current_user.bookmarks]
-        user['articles'] = [post.to_dict() for post in current_user.articles]
+        # user['articles'] = [post.to_dict() for post in current_user.articles]
+        user['liked_comments'] = [comment.id for comment in current_user.liked_comments]
         return jsonify({'user': user, 'status': 'success'})
 
     if request.method == "PATCH":
@@ -99,7 +101,8 @@ def profile():
         user = current_user.to_dict()
         user['tags'] = [tag.id for tag in current_user.interested_subjects]
         user['bookmarks'] = [post.id for post in current_user.bookmarks]
-        user['articles'] = [post.to_dict() for post in current_user.articles]
+        # user['articles'] = [post.to_dict() for post in current_user.articles]
+        user['liked_comments'] = [comment.id for comment in current_user.liked_comments]
         return jsonify({'message': msg, 'user': user}), 200
     
     if request.method == 'DELETE':
@@ -404,3 +407,48 @@ def my_bookmarks(post_id=None):
         msg = 'post has been removed from your bookmarks.'
         return jsonify({'message': msg,
                         'posts': [post.id for post in current_user.bookmarks]}), 200
+
+
+@app_views.route('/me/liked_comments',
+                 methods=['POST'], strict_slashes=False)
+@app_views.route('/me/liked_comments/<comment_id>',
+                 methods=['DELETE'], strict_slashes=False)
+@login_required
+def my_comments(comment_id=None):
+    """
+    ** API endpoint for a user's liked comments ***
+    POST - adds a comment to a user's liked comments
+    DELETE - deletes a comment from a user's liked comments
+    """    
+    if request.method == 'POST':
+        comment = db.query(Comment).filter(Comment.id == comment_id).first()
+        
+        if not comment:
+            return jsonify({'message': f'comment-{comment_id} not found'}), 404
+        
+        try:
+            current_user.liked_comments.append(comment)
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'}), 400
+        
+        msg = 'Comment successfully liked.'
+        return jsonify({'message': msg,
+                        'comments': [comment.id for comment in current_user.liked_comments]}), 200
+
+    if request.method == 'DELETE':
+        comment = db.query(comment).filter(comment.id == comment_id).first()
+        
+        if not comment:
+            return jsonify({'message': f'Comment-{comment_id} not found'}), 404
+        
+        try:
+            new_list = list(filter(lambda x: x.id != comment_id, current_user.liked_comments))
+            current_user.liked_comments = new_list
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'})
+        
+        msg = 'Comment successfully un-liked.'
+        return jsonify({'message': msg,
+                        'comments': [comment.id for comment in current_user.bookmarks]}), 200
