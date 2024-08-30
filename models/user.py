@@ -5,11 +5,8 @@ from datetime import datetime
 from flask_login import UserMixin
 from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from models.associations import user_post, user_tag, user_post_likes
+from models.associations import user_post, user_tag, comment_likes
 from models.base import BaseClass, Base
-from models.post import Post
-from models.tag import Tag
-from models.comment import Comment
 
 
 class User(UserMixin, BaseClass, Base):
@@ -32,6 +29,8 @@ class User(UserMixin, BaseClass, Base):
                              back_populates='bookmarked_by')
     interested_subjects = relationship('Tag', secondary=user_tag,
                                        back_populates='authors')
+    liked_comments = relationship('Comment', secondary=comment_likes,
+                                  back_populates='liked_by')
 
     @property
     def is_active(self):
