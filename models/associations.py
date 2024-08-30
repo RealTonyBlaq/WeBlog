@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ Secondary Tables for Many-to-Many relationship """
 
-from sqlalchemy import Table, Column, String, ForeignKey
+from sqlalchemy import Table, Column, String, ForeignKey, INTEGER
 from models.base import Base
 
 
@@ -35,4 +35,11 @@ post_tag = Table(
     Base.metadata,
     Column('post_id', String(60), ForeignKey('posts.id'), primary_key=True),
     Column('tag_id', String(60), ForeignKey('tags.id'), primary_key=True)
+)
+
+comment_likes = Table(
+    'comment_likes',
+    Base.metadata,
+    Column('comment_id', INTEGER, ForeignKey('comments.id'), primary_key=True),
+    Column('user_id', String(60), ForeignKey('users.id'), primary_key=True)
 )

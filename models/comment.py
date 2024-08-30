@@ -3,6 +3,7 @@
 
 from sqlalchemy import Column, ForeignKey, String, TEXT, INTEGER
 from sqlalchemy.orm import relationship, backref
+from models.associations import comment_likes
 from models.base import BaseClass, Base
 
 
@@ -25,6 +26,8 @@ class Comment(BaseClass, Base):
     author = relationship('User',
                           backref=backref('comments',
                                           cascade='all, delete-orphan'))
+    liked_by = relationship('User',
+                            secondary=comment_likes, back_populates='liked_comments')
 
     def __init__(self, *args, **kwargs):
         """Initializes an instance of the model"""

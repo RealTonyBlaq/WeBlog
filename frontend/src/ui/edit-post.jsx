@@ -18,7 +18,7 @@ const RenderMarkDown = ({ title, body, header_url }) => {
   return (
     <section className="w-full">
       {header_url && (
-        <img src={header_url} alt="header image" className="w-full max-h-96" />
+        <img src={`/${header_url}`} alt="header image" className="w-full max-h-96" />
       )}
       <div
         dangerouslySetInnerHTML={{ __html: header }}
