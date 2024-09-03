@@ -29,7 +29,7 @@ export const MyTextInput = ({ label, ...props }) => {
 export const MyTextArea = ({ label, ...props }) => {
   const [field, meta] = useField(props);
   return (
-    <div className="relative w-full mb-4">
+    <div className="relative w-full mb-1">
       <label
         className="absolute -top-2 left-6 px-2 text-sm text-black dark:text-white bg-white dark:bg-gunmetal"
         htmlFor={props.id || props.name}
@@ -39,7 +39,7 @@ export const MyTextArea = ({ label, ...props }) => {
       <textarea
         className={`w-full ${
           props.height
-        } p-2 md:px-4 md:py-2 text-sm border ${
+        } p-2 text-sm border ${
           meta.error ? "border-red-600" : "border-black/25"
         } hover:border-blue-500 outline-none focus:border-blue-500 dark:bg-gunmetal dark:text-white rounded-md`}
         {...field}
