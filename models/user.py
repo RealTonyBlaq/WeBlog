@@ -5,7 +5,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from models.associations import user_post, user_tag, comment_likes
+from models.associations import bookmarks, user_tag, comment_likes, liked_posts
 from models.base import BaseClass, Base
 
 
@@ -25,7 +25,9 @@ class User(UserMixin, BaseClass, Base):
     is_admin = Column(Boolean, default=False)
     articles = relationship('Post', backref='author',
                             cascade='all, delete, delete-orphan')
-    bookmarks = relationship('Post', secondary=user_post,
+    liked_articles = relationship('Post', secondary=liked_posts,
+                                  back_populates='liked_by')
+    bookmarks = relationship('Post', secondary=bookmarks,
                              back_populates='bookmarked_by')
     interested_subjects = relationship('Tag', secondary=user_tag,
                                        back_populates='authors')

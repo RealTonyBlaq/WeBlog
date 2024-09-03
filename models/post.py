@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ The Post Model """
 
-from models.associations import user_post, post_tag
+from models.associations import bookmarks, post_tag, liked_posts
 from models.base import BaseClass, Base
 from sqlalchemy import String, Column, ForeignKey
 from sqlalchemy.dialects.mysql import LONGTEXT
@@ -16,8 +16,10 @@ class Post(BaseClass, Base):
     author_id = Column(String(60), ForeignKey('users.id'), nullable=False)
     header_url = Column(String(100), nullable=True)
     bookmarked_by = relationship('User',
-                                 secondary=user_post,
+                                 secondary=bookmarks,
                                  back_populates='bookmarks')
+    liked_by = relationship('User', secondary=liked_posts,
+                            back_populates='liked_articles')
     tags = relationship('Tag', secondary=post_tag,
                         back_populates='posts')
     comments = relationship('Comment', backref='posts',

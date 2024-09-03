@@ -7,8 +7,8 @@ from models.base import Base
 
 # Secondary table for User -> Posts (posts liked by user)
 # and Post -> User (Users that like post)
-user_post_likes = Table(
-    'user_post_likes',
+liked_posts = Table(
+    'liked_posts',
     Base.metadata,
     Column('author_id', String(60), ForeignKey('users.id'), primary_key=True),
     Column('post_id', String(60), ForeignKey('posts.id'), primary_key=True)
@@ -16,8 +16,8 @@ user_post_likes = Table(
 
 # Secondary table for User -> Posts (bookmarks)
 # and Post -> User
-user_post = Table(
-    'user_post',
+bookmarks = Table(
+    'bookmarks',
     Base.metadata,
     Column('author_id', String(60), ForeignKey('users.id'), primary_key=True),
     Column('post_id', String(60), ForeignKey('posts.id'), primary_key=True)
