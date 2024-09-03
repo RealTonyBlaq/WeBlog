@@ -4,29 +4,32 @@ from flask import jsonify, request
 from flask_login import login_required, current_user
 from models.comment import Comment
 from models.post import Post
-from sqlalchemy import func
+from sqlalchemy import and_, text
 from sqlalchemy.exc import IntegrityError
 from utils import db
 from werkzeug.exceptions import BadRequest
 import math
 
 
-@app_views.route("/posts/<post_id>/comments/<order>", methods=["GET"],
+@app_views.route("/posts/<post_id>/comments", methods=["GET"],
                  strict_slashes=False)
-def comments(post_id, order):
+def comments(post_id):
     """
     ** API endpoint for comments under a post ***
     GET - returns comments for a post
     """
     from api.v1.app import executor
     if request.method == "GET":
-        if order not in ['oldest', 'newest', 'popular']:
-            return jsonify({'message': 'Comment order unspecified'}), 400
         # get all comments
         # get page number
         page = request.args.get('page', type=int, default=1)
         # get limit number
         limit = request.args.get('limit', type=int, default=4)
+        # get order
+        order = request.args.get('order', type=str, default='oldest')
+
+        if order not in ['oldest', 'latest', 'top']:
+            return jsonify({'message': 'Comment order unspecified - oldest, latest, top'}), 400
 
         if page < 1 or limit < 1:
             return ({'message': 'Page number\
@@ -36,40 +39,68 @@ def comments(post_id, order):
         start = limit * (page - 1)
 
         # construct query based on order
-        if order == 'oldest':
-            query = db.query(Comment).filter(
-                Comment.post_id == post_id).order_by(Comment.created_at.asc())
-        elif order == 'newest':
-            query = db.query(Comment).filter(
-                Comment.post_id == post_id).order_by(Comment.created_at.desc())
+        q = db.query(Comment).filter(and_(Comment.post_id == post_id),
+                                     Comment.parent_id == None)
+        if order != 'top':
+            if order == 'oldest':
+                query = q.order_by(Comment.id.asc())
+            elif order == 'latest':
+                query = q.order_by(Comment.id.desc())
+            
+            futures = [
+                executor.submit(query.slice, start, start + limit),
+                executor.submit(query.count)
+            ]
+            comments = futures[0].result()
+            count = futures[1].result()
         else:
-            query = db.query(Comment).filter(
-                Comment.post_id == post_id).order_by(func.count(Comment.liked_by).desc())
-
-        futures = [
-            executor.submit(query.slice, start, start + limit),
-            executor.submit(query.count)
-        ]
-        comments = futures[0].result()
-        count = futures[1].result()
+            query = db._Storage__session.execute(
+                text('SELECT comments.*, COUNT(comment_likes.user_id) AS likes, reply_count, \
+                     first_name, last_name, avatar_url\
+                     FROM comments LEFT JOIN comment_likes ON comments.id = comment_likes.comment_id \
+                     LEFT OUTER JOIN \
+                        (SELECT comments.id, COUNT(replies.id) AS reply_count FROM comments \
+                        LEFT OUTER JOIN comments AS replies ON comments.id = replies.parent_id GROUP BY comments.id \
+                        ORDER BY reply_count DESC) AS replies_t ON comments.id = replies_t.id \
+                     LEFT OUTER JOIN \
+                        (SELECT id, first_name, last_name, avatar_url FROM users) AS comment_authors \
+                     ON comments.author_id = comment_authors.id \
+                     WHERE comments.parent_id IS NULL AND comments.post_id = :post_id \
+                     GROUP BY comments.id ORDER BY likes DESC, (likes + replies_t.reply_count) DESC\
+                     LIMIT :limit OFFSET :skip;'),
+                     {'post_id': post_id, 'limit': limit, 'skip': (page - 1) * limit})
+            
+            comments_list = []
+            for comment in query:
+                obj = {'author': {}}
+                obj['id'], obj['post_id'], obj['author_id'], obj['parent_id'],\
+                    obj['content'], obj['path'], obj['created_at'], obj['updated_at'],\
+                        obj['likes'], obj['replies'], obj['author']['first_name'], obj['author']['last_name'],\
+                            obj['author']['avatar_url'] = comment
+                comments_list.append(obj)
+            
+            count = db.query(Comment).filter(and_(Comment.post_id == post_id),
+                                     Comment.parent_id == None).count()
 
         total_pages = math.ceil(count / limit)
 
         if page != 1 and page > total_pages:
             return ({'message': 'Page out of range'}, 404)
 
-        comments_list = []
-        for comment in comments:
-            obj = comment.to_dict()
-            author = comment.author
-            obj['likes'] = len(comment.liked_by)
-            obj['author'] = {'first_name': author.first_name,
-                             'last_name': author.last_name,
-                             'id': author.id,
-                             'avatar_url': author.avatar_url,
-                             'email': author.email}
-            obj['replies'] = len(comment.replies)
-            comments_list.append(obj)
+        if order != 'top':
+            comments_list = []
+            for value in comments:
+                comment = value
+                obj = comment.to_dict()
+                author = comment.author
+                obj['likes'] = len(comment.liked_by)
+                obj['author'] = {'first_name': author.first_name,
+                                 'last_name': author.last_name,
+                                 'id': author.id,
+                                 'avatar_url': author.avatar_url,
+                                 'email': author.email}
+                obj['replies'] = len(comment.replies)
+                comments_list.append(obj)
         return ({'comments': comments_list, 'page': f'{page}',
                  'total_pages': f"{total_pages}"}), 200
 
@@ -90,7 +121,7 @@ def comments_replies(comment_id):
         # get page number
         page = request.args.get('page', type=int, default=1)
         # get limit number
-        limit = request.args.get('limit', type=int, default=4)
+        limit = request.args.get('limit', type=int, default=2)
 
         if page < 1 or limit < 1:
             return ({'message': 'Page number\
@@ -99,33 +130,38 @@ def comments_replies(comment_id):
         # calculate start
         start = limit * (page - 1)
 
-        # construct query based on order - most popular (default)
-        query = db.query(Comment).filter(
-                Comment.parent_id == comment_id).order_by(func.count(Comment.liked_by).desc())
-        futures = [
-            executor.submit(query.slice, start, start + limit),
-            executor.submit(query.count)
-        ]
-        comments = futures[0].result()
-        count = futures[1].result()
+        # construct query - order by likes
+        query = db._Storage__session.execute(
+            text('SELECT comments.*, COUNT(comment_likes.user_id) AS likes, reply_count, \
+                 first_name, last_name, avatar_url\
+                 FROM comments LEFT JOIN comment_likes ON comments.id = comment_likes.comment_id \
+                 LEFT OUTER JOIN \
+                 (SELECT comments.id, COUNT(replies.id) AS reply_count FROM comments \
+                 LEFT OUTER JOIN comments AS replies ON comments.id = replies.parent_id GROUP BY comments.id \
+                 ORDER BY reply_count DESC) AS replies_t ON comments.id = replies_t.id \
+                 LEFT OUTER JOIN \
+                 (SELECT id, first_name, last_name, avatar_url FROM users) AS comment_authors \
+                 ON comments.author_id = comment_authors.id WHERE comments.parent_id = :parent_id\
+                 GROUP BY comments.id ORDER BY likes DESC, (likes + replies_t.reply_count) DESC\
+                 LIMIT :limit OFFSET :skip;'),
+                 {'parent_id': comment_id, 'limit': limit, 'skip': (page - 1) * limit})
+            
+        comments_list = []
+        for comment in query:
+            obj = {'author': {}}
+            obj['id'], obj['post_id'], obj['author_id'], obj['parent_id'],\
+                obj['content'], obj['path'], obj['created_at'], obj['updated_at'],\
+                    obj['likes'], obj['replies'], obj['author']['first_name'], obj['author']['last_name'],\
+                        obj['author']['avatar_url'] = comment
+            comments_list.append(obj)
+            
+        count = db.query(Comment).filter(Comment.parent_id == comment_id).count()
 
         total_pages = math.ceil(count / limit)
 
         if page != 1 and page > total_pages:
             return ({'message': 'Page out of range'}, 404)
 
-        comments_list = []
-        for comment in comments:
-            obj = comment.to_dict()
-            author = comment.author
-            obj['likes'] = len(comment.liked_by)
-            obj['author'] = {'first_name': author.first_name,
-                             'last_name': author.last_name,
-                             'id': author.id,
-                             'avatar_url': author.avatar_url,
-                             'email': author.email}
-            obj['replies'] = len(comment.replies)
-            comments_list.append(obj)
         return ({'comments': comments_list, 'page': f'{page}',
                  'total_pages': f"{total_pages}"}), 200
 
@@ -174,6 +210,8 @@ def modify_comments(post_id, comment_id=None):
         msg = 'Comment created.'
         comment_dict = comment.to_dict()
         del comment_dict['parent']
+        comment_dict['likes'] = len(comment.liked_by)
+        comment_dict['replies'] = len(comment.replies)
         comment_dict['author'] = {'first_name': current_user.first_name,
                                   'last_name': current_user.last_name,
                                   'id': current_user.id,
@@ -222,7 +260,17 @@ def modify_comments(post_id, comment_id=None):
             return jsonify({'message': f'{f}'})
 
         msg = 'Comment updated successfully.'
-        return jsonify({'message': msg, 'comment': comment.to_dict()}), 200
+        comment_dict = comment.to_dict()
+        if 'parent' in comment_dict:
+            del comment_dict['parent']
+        comment_dict['likes'] = len(comment.liked_by)
+        comment_dict['replies'] = len(comment.replies)
+        comment_dict['author'] = {'first_name': current_user.first_name,
+                                  'last_name': current_user.last_name,
+                                  'id': current_user.id,
+                                  'avatar_url': current_user.avatar_url,
+                                  'email': current_user.email}
+        return jsonify({'message': msg, 'comment': comment_dict}), 200
 
     if request.method == 'DELETE':
         from sqlalchemy import and_
