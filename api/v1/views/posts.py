@@ -58,7 +58,8 @@ def search_posts():
                 {post.author.last_name}"
             post_obj['author_avatar'] = post.author.avatar_url
             post_obj['no_of_comments'] = len(post.comments)
-            post_obj['no_of_likes'] = len(post.bookmarked_by)
+            post_obj['bookmarks'] = len(post.bookmarked_by)
+            post_obj['likes'] = len(post.liked_by)
             post_obj['tags'] = [tag.name for tag in post.tags]
             posts_list.append(post_obj)
 
@@ -82,6 +83,7 @@ def get_post(post_id=None):
         return jsonify({'message': f'Post with id-{post_id} not found'}), 404
     return jsonify({'post': article.to_dict(),
                     'tags': [tag.name for tag in article.tags],
+                    'likes': len(article.liked_by),
                     'author': {'first_name': article.author.first_name,
                                'last_name': article.author.last_name,
                                'id': article.author.id,
