@@ -36,7 +36,7 @@ def profile():
         user = current_user.to_dict()
         user['tags'] = [tag.id for tag in current_user.interested_subjects]
         user['bookmarks'] = [post.id for post in current_user.bookmarks]
-        # user['articles'] = [post.to_dict() for post in current_user.articles]
+        user['liked_articles'] = [post.id for post in current_user.liked_articles]
         user['liked_comments'] = [comment.id for comment in current_user.liked_comments]
         return jsonify({'user': user, 'status': 'success'})
 
@@ -107,6 +107,7 @@ def profile():
         user['tags'] = [tag.id for tag in current_user.interested_subjects]
         user['bookmarks'] = [post.id for post in current_user.bookmarks]
         # user['articles'] = [post.to_dict() for post in current_user.articles]
+        user['liked_articles'] = [post.id for post in current_user.liked_articles]
         user['liked_comments'] = [comment.id for comment in current_user.liked_comments]
         return jsonify({'message': msg, 'user': user}), 200
 
@@ -312,7 +313,7 @@ def my_posts(post_id=None):
         return jsonify({}), 200
 
 
-@app_views.route('/me/tags', methods=['GET', 'POST'],
+@app_views.route('/me/tags', methods=['GET', 'PATCH'],
                  strict_slashes=False)
 @app_views.route('/me/tags/<tag_id>',
                  methods=['DELETE'], strict_slashes=False)
@@ -329,7 +330,7 @@ def my_tags(tag_id=None):
         return jsonify({'tags': [tag.to_dict() for tag in
                                  current_user.interested_subjects]}), 200
 
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
 
         if not tag:
@@ -368,15 +369,62 @@ def my_tags(tag_id=None):
                                  current_user.interested_subjects]}), 200
 
 
+@app_views.route('/me/liked_articles/<post_id>',
+                 methods=['PATCH', 'DELETE'], strict_slashes=False)
+@login_required
+def my_liked_articles(post_id=None):
+    """
+    ** API endpoint for a user's liked articles ***
+    PATCH - adds a post to a user's liked articles
+    DELETE - deletes a post from a user's liked articles
+    """
+    if request.method == 'PATCH':
+        post = db.query(Post).filter(Post.id == post_id).first()
+
+        if not post:
+            return jsonify({'message': f'Post wit id-{post_id} \
+                not found'}), 404
+
+        try:
+            current_user.liked_articles.append(post)
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'}), 400
+
+        msg = 'Post liked.'
+        return jsonify({'message': msg,
+                        'posts': [post.id for post in
+                                  current_user.liked_articles]}), 200
+
+    if request.method == 'DELETE':
+        post = db.query(Post).filter(Post.id == post_id).first()
+
+        if not post:
+            return jsonify({'message': f'Tag wit id-{post_id} \
+                not found'}), 404
+
+        try:
+            new_list = list(filter(lambda x: x.id != post_id,
+                                   current_user.liked_articles))
+            current_user.liked_articles = new_list
+            current_user.save()
+        except IntegrityError:
+            return jsonify({'message': 'Database integrity error'})
+
+        msg = 'post has been unliked.'
+        return jsonify({'message': msg,
+                        'posts': [post.id for post in current_user.liked_articles]}), 200
+
+
 @app_views.route('/me/bookmarks',
                  methods=['GET'], strict_slashes=False)
 @app_views.route('/me/bookmarks/<post_id>',
-                 methods=['POST', 'DELETE'], strict_slashes=False)
+                 methods=['PATCH', 'DELETE'], strict_slashes=False)
 @login_required
 def my_bookmarks(post_id=None):
     """
     ** API endpoint for a user's posts ***
-    PUT - adds a post to a user's bookmarks
+    PATCH - adds a post to a user's bookmarks
     DELETE - deletes a post from a user's bookmarks
     """
     if request.method == 'GET':
@@ -390,7 +438,7 @@ def my_bookmarks(post_id=None):
             bookmarks_list.append(new_obj)
         return jsonify({'bookmarks': bookmarks_list}), 200
 
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         post = db.query(Post).filter(Post.id == post_id).first()
 
         if not post:
@@ -428,18 +476,16 @@ def my_bookmarks(post_id=None):
                         'posts': [post.id for post in current_user.bookmarks]}), 200
 
 
-@app_views.route('/me/liked_comments',
-                 methods=['POST'], strict_slashes=False)
 @app_views.route('/me/liked_comments/<comment_id>',
-                 methods=['DELETE'], strict_slashes=False)
+                 methods=['PATCH', 'DELETE'], strict_slashes=False)
 @login_required
 def my_comments(comment_id=None):
     """
     ** API endpoint for a user's liked comments ***
-    POST - adds a comment to a user's liked comments
+    PATCH - adds a comment to a user's liked comments
     DELETE - deletes a comment from a user's liked comments
     """    
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         comment = db.query(Comment).filter(Comment.id == comment_id).first()
         
         if not comment:
@@ -456,13 +502,13 @@ def my_comments(comment_id=None):
                         'comments': [comment.id for comment in current_user.liked_comments]}), 200
 
     if request.method == 'DELETE':
-        comment = db.query(comment).filter(comment.id == comment_id).first()
+        comment = db.query(Comment).filter(Comment.id == comment_id).first()
         
         if not comment:
             return jsonify({'message': f'Comment-{comment_id} not found'}), 404
         
         try:
-            new_list = list(filter(lambda x: x.id != comment_id, current_user.liked_comments))
+            new_list = list(filter(lambda x: x.id != int(comment_id), current_user.liked_comments))
             current_user.liked_comments = new_list
             current_user.save()
         except IntegrityError:
