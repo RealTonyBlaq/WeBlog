@@ -1,8 +1,7 @@
 // import toast from "react-hot-toast";
 import { Axios } from "../lib/axios";
 import errorHandler from "../lib/errorHandler";
-
-const baseURL = import.meta.env.VITE_BASE_URL;
+import { baseURL } from "./auth";
 
 export const fetchPosts = async (page = 1) => {
   const data = await fetch(`${baseURL}/api/v1/posts?page=${page}`);
@@ -62,14 +61,6 @@ export const deleteMyPost = async (post_id) => {
   }
 };
 
-export const fetchPostComments = async (id, page = 1) => {
-  const data = await fetch(
-    `${baseURL}/api/v1/posts/${id}/comments?page=${page}&limit=4`
-  );
-
-  return await data.json();
-};
-
 export const createPost = async (payload) => {
   try {
     const data = await Axios.post(`/api/v1/my_posts`, payload);
@@ -88,20 +79,18 @@ export const editPost = async (post_id, payload) => {
   }
 };
 
-export const postComment = async (post_id, payload) => {
+export const addToLikedArticles = async (postId) => {
   try {
-    const data = await Axios.post(`/api/v1/posts/${post_id}/comments`, payload);
+    const data = await Axios.patch(`/api/v1/me/liked_articles/${postId}`);
     return data;
   } catch (e) {
     errorHandler(e);
   }
 };
 
-export const deleteComment = async (post_id, comment_id) => {
+export const removeFromLikedArticles = async (postId) => {
   try {
-    const data = await Axios.delete(
-      `/api/v1/posts/${post_id}/comments/${comment_id}`
-    );
+    const data = await Axios.delete(`/api/v1/me/liked_articles/${postId}`);
     return data;
   } catch (e) {
     errorHandler(e);
@@ -110,7 +99,7 @@ export const deleteComment = async (post_id, comment_id) => {
 
 export const addToBookmark = async (bookmarkId) => {
   try {
-    const data = await Axios.post(`/api/v1/me/bookmarks/${bookmarkId}`);
+    const data = await Axios.patch(`/api/v1/me/bookmarks/${bookmarkId}`);
     return data;
   } catch (e) {
     errorHandler(e);
