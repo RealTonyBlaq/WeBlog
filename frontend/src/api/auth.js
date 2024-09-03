@@ -80,8 +80,8 @@ const resetPassword = async (payload) => {
   return data;
 };
 
-const resendConfirmationEmail = async (email) => {
-  const { data } = await Axios.post("/api/v1/resend_conf_email", { email });
+const resendConfirmationEmail = async (payload) => {
+  const { data } = await Axios.post("/api/v1/resend_conf_email", payload);
   return data;
 };
 
