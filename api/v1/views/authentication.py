@@ -160,6 +160,9 @@ def login():
                                       current_user.bookmarks]
             user_dict['articles'] = [post.to_dict() for post in
                                      current_user.articles]
+            user_dict['liked_articles'] = [post.to_dict() for post in
+                                     current_user.liked_articles]
+            user_dict['liked_comments'] = [comment.id for comment in current_user.liked_comments]
             # Updates last_login time
             user.last_login = datetime.now()
             # sets is_logged_in to be True. This could help
@@ -245,8 +248,7 @@ def send_password_reset_mail():
 
     # send reset email
     base_url = url_for('home', _external=True)
-    route_url = f'reset_password/{user.generate_reset_password_token()}/\
-      {user.id}'
+    route_url = f'reset_password/{user.generate_reset_password_token()}/{user.id}'
     reset_url = base_url + route_url
     content = f"""Dear {user.first_name} {user.last_name},
 
