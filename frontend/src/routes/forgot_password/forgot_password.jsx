@@ -9,7 +9,6 @@ export default function ForgotPassword() {
   const { mutate, isLoading } = useForgotPassword();
 
   const submitFormHandler = async (values) => {
-    console.log(values);
     mutate(values.email)
   };
 

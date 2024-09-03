@@ -7,11 +7,9 @@ import { useResetPassword } from "../../api/auth";
 
 export default function ResetPassword() {
   const url = window.location.href;
-  // console.log(url);
   const { mutate, isLoading } = useResetPassword();
 
   const submitFormHandler = async (values) => {
-    console.log(values);
     mutate({
       url,
       password: values.password,

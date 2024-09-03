@@ -11,7 +11,6 @@ export default function Header() {
   const [darkTheme, setTheme] = useState();
   const [showMenu, setMenu] = useState(false);
   const [showUserMenu, setUserMenu] = useState(false);
-  console.log(user)
 
   const navigate = useNavigate();
 

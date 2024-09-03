@@ -69,7 +69,6 @@ const forgotPassword = async (email) => {
 
 // restructure later - done
 const resetPassword = async (payload) => {
-  // console.log(payload.url);
   // remove initial section of current url (http://localhost:5000) and append
   // to /api/v1/ to get reset rpassword route
   

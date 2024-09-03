@@ -77,8 +77,6 @@ export const deleteComment = async (postId, commentId, setComment) => {
         }));
       }
     } catch (e) {
-      console.log(e);
-
       errorHandler(e);
     }
   }

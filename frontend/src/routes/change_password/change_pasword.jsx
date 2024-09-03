@@ -14,7 +14,6 @@ export default function ChangeMyPassword() {
   // const isLoading = signupLoading;
 
   const submitFormHandler = async (values) => {
-    // console.log(values);
     const response = await updateProfile(values)
     if (response) {
       toast.success(response.message)

@@ -16,10 +16,8 @@ export const handleImageUpload = async (type, file) => {
 
       const data = await result.json();
       toast.success(data.message)
-      // console.log(data);
       return data
     } catch (error) {
-      // console.error(error);
       toast.error(error.message)
     }
   }
