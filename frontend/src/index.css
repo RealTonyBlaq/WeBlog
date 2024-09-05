@@ -23,3 +23,19 @@
       min-height: calc(100vh - 140px);
   }
 }
+
+.post_markdown h1 {
+  @apply mb-4 text-3xl md:text-4xl xl:text-5xl font-bold
+}
+
+.post_markdown p {
+  @apply mb-4 md:mb-8 xl:mb-12
+}
+
+.post_markdown a {
+  @apply text-blue-500 hover:underline
+}
+
+.post_card_markdown h1 {
+  @apply md:text-lg xl:text-xl font-semibold
+}
