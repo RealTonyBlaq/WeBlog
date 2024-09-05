@@ -102,8 +102,7 @@ export const changePasswordSchema = yup.object().shape({
 });
 
 export const postSchema = yup.object().shape({
-  title: yup.string().min(8).required("Title is required"),
-  body: yup.string().min(100).required("Body is required"),
+  content: yup.string().min(72).required("Post must have content ie a title starting with a '#' and a body"),
 });
 
 export const commentSchema = yup.object().shape({

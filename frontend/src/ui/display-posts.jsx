@@ -45,12 +45,14 @@ export default function DisplayPosts({ posts, fetchData }) {
           <PostCard
             key={post.id}
             id={post.id}
-            author={post.author || post.author_id}
+            author={post.author}
+            authorId={post.author_id}
             tags={post.tags}
             title={post.title}
             header_url={post.header_url}
             no_of_comments={post.no_of_comments}
-            no_of_bookmarks={post.no_of_bookmarks}
+            no_of_likes={post.no_of_likes}
+            is_published={post.is_published}
           />
         ))}
       </div>

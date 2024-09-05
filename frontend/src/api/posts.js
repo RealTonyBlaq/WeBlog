@@ -32,6 +32,16 @@ export const fetchMyPosts = async (page = 1) => {
   }
 };
 
+export const fetchMyDrafts = async (page = 1) => {
+  try {
+    const data = await Axios.get(`${baseURL}/api/v1/my_posts?page=${page}&published=False`);
+
+    return data;
+  } catch (e) {
+    errorHandler(e);
+  }
+};
+
 export const fetchMyBookmarks = async () => {
   try {
     const data = await Axios.get(`${baseURL}/api/v1/me/bookmarks`);

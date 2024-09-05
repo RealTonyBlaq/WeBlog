@@ -1,5 +1,5 @@
-import React, { ClassAttributes, InputHTMLAttributes, useState } from "react";
-import { FieldHookConfig, useField } from "formik";
+import React, { useState } from "react";
+import { useField } from "formik";
 import { useOutsideClick } from "../lib/useOutsideClick";
 
 export const MyTextInput = ({ label, ...props }) => {
@@ -13,7 +13,7 @@ export const MyTextInput = ({ label, ...props }) => {
         {label}
       </label>
       <input
-        className={`w-full p-2 md:px-4 md:py-2 md:text-lg border ${
+        className={`w-full p-2 md:px-4 md:py-2 border ${
           meta.error ? "border-red-600" : "border-black/25"
         } hover:border-blue-500 outline-none focus:border-blue-500 dark:bg-gunmetal dark:text-white rounded-xl`}
         {...field}
@@ -111,8 +111,8 @@ export const MyTextAndCheckInput = ({ label, checkValue, data, ...props }) => {
         <input
           onFocus={openFocus}
           className={`w-full p-2 md:px-4 md:py-3 tablet:mt-1 laptop:mt-2 font-normal text-sm border ${
-            meta.error ? "border-red-600" : "border-dark/25"
-          } hover:border-dark/50 focus:border-dark/75 outline-none rounded-xl md:rounded-2xl`}
+            meta.error ? "border-red-600" : "border-black/25"
+          } hover:border-black/50 focus:border-black/75 dark:bg-gunmetal dark:text-white outline-none rounded md:rounded-md`}
           {...field}
           {...props}
           onChange={(e) => {

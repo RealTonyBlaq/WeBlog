@@ -32,7 +32,10 @@ export default function Header() {
   };
 
   const openUserMenu = () => setUserMenu(true);
-  const closeUserMenu = () => setUserMenu(false);
+  const closeUserMenu = (e) => {
+    if (e) e.stopPropagation()
+    setUserMenu(false);
+  }
 
   const ref = useOutsideClick(closeUserMenu);
 

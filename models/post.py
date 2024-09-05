@@ -3,7 +3,7 @@
 
 from models.associations import bookmarks, post_tag, liked_posts
 from models.base import BaseClass, Base
-from sqlalchemy import String, Column, ForeignKey
+from sqlalchemy import String, Column, Boolean, ForeignKey
 from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import relationship
 
@@ -15,6 +15,7 @@ class Post(BaseClass, Base):
     body = Column(LONGTEXT, nullable=False)
     author_id = Column(String(60), ForeignKey('users.id'), nullable=False)
     header_url = Column(String(100), nullable=True)
+    is_published = Column(Boolean, default=False)
     bookmarked_by = relationship('User',
                                  secondary=bookmarks,
                                  back_populates='bookmarks')
