@@ -185,7 +185,7 @@ const RenderPostMarkDown = () => {
         </div>
         <div
           dangerouslySetInnerHTML={{ __html: header }}
-          className="mb-4 text-2xl md:text-3xl xl:text-5xl font-bold"
+          className="post_markdown"
         ></div>
         <div className="font-medium mb-4">
           {tags.length
@@ -194,7 +194,7 @@ const RenderPostMarkDown = () => {
         </div>
         <article
           dangerouslySetInnerHTML={{ __html: content }}
-          className=""
+          className="post_markdown"
         ></article>
         <div className="w-full flex items-center justify-between text-xl md:text-2xl my-4 md:my-8">
           <div className="flex items-center gap-1 md:gap-2">
