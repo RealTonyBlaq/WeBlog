@@ -30,7 +30,8 @@ def profile():
         "first_name",
         "last_name",
         "username",
-        "password"
+        "password",
+        "bio"
     ]
     if request.method == "GET":
         # return profile data
