@@ -29,11 +29,13 @@ import { loader as HomeLoader } from "./routes/home/loader";
 import { loader as PostLoader } from "./routes/post/loader";
 import { loader as TagsLoader } from "./routes/create_posts/loader";
 import { loader as myPostsLoader } from "./routes/my_posts/loader";
+import { loader as myDraftsLoader } from "./routes/my_drafts/loader"
 import { loader as editPostLoader } from "./routes/edit_posts/loader";
 import { loader as bookmarksLoader } from "./routes/my_bookmarks/loader";
 import { loader as searchLoader } from "./routes/search/loader";
 // actions
 import { action as DeletePost } from "./routes/delete_post/action";
+import MyDraftsPage from "./routes/my_drafts/my_drafts";
 
 const queryClient = new QueryClient();
 
@@ -121,6 +123,11 @@ const router = createBrowserRouter([
                 path: "my_posts",
                 element: <MyPostsPage />,
                 loader: myPostsLoader
+              },
+              {
+                path: "my_drafts",
+                element: <MyDraftsPage />,
+                loader: myDraftsLoader
               },
               {
                 path: "my_posts/:id/delete",
