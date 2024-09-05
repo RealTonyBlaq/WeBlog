@@ -7,6 +7,7 @@ from models.comment import Comment
 from models.user import User
 from models.post import Post
 from models.tag import Tag
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from utils import db
 from werkzeug.exceptions import BadRequest
@@ -135,11 +136,13 @@ def my_posts(post_id=None):
         "header_url",
         "title",
         "body",
-        "tag_ids"
+        "tag_ids",
+        "is_published"
     ]
     user_id = current_user.get_id()
 
     if request.method == 'GET':
+        from api.v1.app import executor
         if post_id:
             # this returns an article
             article = db.query(Post).filter(Post.id == post_id).first()
@@ -157,26 +160,50 @@ def my_posts(post_id=None):
         page = request.args.get('page', type=int, default=1)
         # get limit number
         limit = request.args.get('limit', type=int, default=10)
+        # published or drafts
+        published = True if not request.args.get('published') \
+            or request.args.get('published') == 'True'  else False
 
         if page < 1 or limit < 1:
             return ({'message': 'Page number\
                      or limit should not be less than 1'}, 400)
 
-        my_articles = []
-        for article in current_user.articles:
-            new_obj = article.to_dict()
-            new_obj['no_of_comments'] = len(article.comments)
-            new_obj['no_of_bookmarks'] = len(article.bookmarked_by)
-            new_obj['tags'] = [tag.name for tag in article.tags]
-            my_articles.append(new_obj)
-        count = len(my_articles)
+        # calculate start and end
+        start = limit * (page - 1)
+
+        query = db.query(Post).filter(and_(
+            Post.is_published == published,
+            Post.author_id == current_user.get_id()
+        ))
+
+        futures = [
+            executor.submit(query.slice, start, start + limit),
+            executor.submit(query.count)
+            ]
+        objs = futures[0].result()
+        count = futures[1].result()
+
+        # list to be returned
+        objs_list = []
+        # add tags and number of comments to each object
+        for obj in objs:
+            new_obj = obj.to_dict()
+            if new_obj.get('__class__') == 'Post':
+                new_obj['author'] = f"{obj.author.first_name} \
+                    {obj.author.last_name}"
+                new_obj['author_avatar'] = obj.author.avatar_url
+                new_obj['no_of_comments'] = len(obj.comments)
+                new_obj['no_of_bookmarks'] = len(obj.bookmarked_by)
+                new_obj['tags'] = [tag.name for tag in obj.tags]
+            objs_list.append(new_obj)
+
         total_pages = math.ceil(count / limit)
 
         if page != 1 and page > total_pages:
             return ({'message': 'Page out of range'}, 404)
 
-        return ({'data': my_articles, 'page': f'{page}',
-                 'total_pages': f"{total_pages}"}, 200)
+        return jsonify({'data': objs_list, 'page': f'{page}',
+             'total_pages': f"{total_pages}"}), 200
 
     if request.method == 'POST':
         if not request.is_json:
@@ -193,6 +220,7 @@ def my_posts(post_id=None):
         header_url = data.get('header_url')
         title = data.get('title')
         body = data.get('body')
+        is_published = data.get('is_published')
 
         if not title and len(title) == 0:
             return jsonify({'message': 'Missing title'}), 400
@@ -201,7 +229,8 @@ def my_posts(post_id=None):
 
         post = Post(
             title=title, body=body,
-            author_id=user_id, header_url=header_url
+            author_id=user_id, header_url=header_url,
+            is_published=is_published
         )
         try:
             db.add(post)
@@ -233,7 +262,7 @@ def my_posts(post_id=None):
         if "tags" in post_dict:
             del post_dict['tags']
             post_dict["tags"] = [tag.name for tag in post.tags]
-        msg = 'Post created.'
+        msg = f'Post successfully ' + 'published.' if is_published else 'saved.'
         return jsonify({'message': msg, 'post': post_dict}), 201
 
     if request.method == 'PATCH':
@@ -262,11 +291,13 @@ def my_posts(post_id=None):
                 return jsonify({'message': f'Cannot update \
                     attribute - {k}'}), 400
 
-            if k != 'tag_ids' and len(v.strip()) == 0:
+            if k != 'tag_ids' and k != 'is_published' and len(v.strip()) == 0:
                 return jsonify({'message': f'Missing {k}'}), 400
             # update attribute
-            if k != 'tag_ids':
+            if k != 'tag_ids' and k != 'is_published':
                 setattr(post, k, v.strip())
+            if k == 'is_published':
+                setattr(post, k, v)
 
         # save changes
         try:
@@ -436,7 +467,7 @@ def my_bookmarks(post_id=None):
             new_obj['no_of_bookmarks'] = len(article.bookmarked_by)
             new_obj['tags'] = [tag.name for tag in article.tags]
             bookmarks_list.append(new_obj)
-        return jsonify({'bookmarks': bookmarks_list}), 200
+        return jsonify({'data': bookmarks_list}), 200
 
     if request.method == 'PATCH':
         post = db.query(Post).filter(Post.id == post_id).first()
