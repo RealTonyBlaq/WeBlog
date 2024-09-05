@@ -1,38 +1,54 @@
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleImageUpload } from "../api/upload";
-import { Bars } from "react-loader-spinner";
 import { Form, Formik } from "formik";
-import { postSchema } from "../lib/utils";
-import { MyTextAndCheckInput, MyTextArea } from "./form-input";
+import { MyTextAndCheckInput } from "./form-input";
 import TagButton from "./tag-button";
 import { createPost, deleteMyPost, editPost } from "../api/posts";
 import toast from "react-hot-toast";
+import SimpleMDE from "react-simplemde-editor";
+import "easymde/dist/easymde.min.css";
+import { baseURL } from "../api/auth";
 
-const RenderMarkDown = ({ title, body, header_url }) => {
+const RenderMarkDown = ({ title, body, header_url, tags }) => {
   const header = DOMPurify.sanitize(marked.parse(title));
   const content = DOMPurify.sanitize(marked.parse(body));
 
   return (
     <section className="w-full">
       {header_url && (
-        <img src={`/${header_url}`} alt="header image" className="w-full max-h-96" />
+        <img
+          src={`/${header_url}`}
+          alt="header image"
+          className="w-full max-h-96"
+        />
       )}
       <div
         dangerouslySetInnerHTML={{ __html: header }}
-        className="mb-4 text-xl md:text-2xl xl:text-3xl font-bold"
+        className="post_markdown"
       ></div>
-      <article dangerouslySetInnerHTML={{ __html: content }}></article>
+      <div className="font-medium mb-4">
+        {tags.length
+          ? tags.map((tag, i) => <span key={`${i + tag}`}>#{tag} </span>)
+          : null}
+      </div>
+      <article
+        dangerouslySetInnerHTML={{ __html: content }}
+        className="post_markdown"
+      ></article>
     </section>
   );
 };
 
 export default function EditPost({ post, tags }) {
   const [preview, setPreview] = useState(false);
-  const [title, setTitle] = useState(post ? post.title : "");
-  const [body, setBody] = useState(post ? post.body : "");
+  const [content, setContent] = useState(
+    post ? post.title + "\n" + post.body : ""
+  );
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
   const [header_url, setHeaderUrl] = useState(post ? post.header_url : "");
   const [subject_tags, setSubjectTags] = useState(
     post ? tags.filter((tag) => post.tag_ids.includes(tag.id)) : []
@@ -45,8 +61,6 @@ export default function EditPost({ post, tags }) {
       setFile(e.target.files[0]);
     }
   };
-
-  const isLoading = false;
 
   const handleTagCheck = (tag) => {
     if (!subject_tags.find((elem) => elem.id === tag.id))
@@ -64,20 +78,86 @@ export default function EditPost({ post, tags }) {
     if (preview) setPreview(false);
   };
 
-  const handleTitleChange = (e) => setTitle(e.target.value);
-  const handleBodyChange = (e) => setBody(e.target.value);
+  const handleContentChange = useCallback((e) => {
+    setContent(e);
+  }, []);
 
-  const submitFormHandler = async (values) => {
-    values.tag_ids = subject_tags.map((tag) => tag.id);
-    values.header_url = header_url;
+  const markDownHeaderRegex = /^(#{1,6})\s+.*\n$/;
+
+  const handlePostSubmit = async (action, type) => {
+    // splits the content into the title and the body
+    // checks for the index of the first new line
+
+    const firstNewLine = content.indexOf("\n");
+    const title = content.slice(0, firstNewLine + 1);
+    const body = content.slice(firstNewLine + 1);
+
+    if (!title || !markDownHeaderRegex.test(title) || title.length < 8) {
+      alert(
+        'Post must have a title and the title must start with a header - "#" and end with a newline and have at least 8 characters.'
+      );
+    } else if (!body || body.length < 64) {
+      alert(
+        "Post must have a body and the body must have at least 64 characters."
+      );
+    } else {
+      const values = {
+        title,
+        body,
+        header_url,
+        tag_ids: subject_tags.map((tag) => tag.id),
+      };
+
+      if (type == "Publish") {
+        await publishPostHandler(values);
+      } else {
+        await savePostHandler(values);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (preview) {
+      const firstNewLine = content.indexOf("\n");
+      const title = content.slice(0, firstNewLine + 1);
+      const body = content.slice(firstNewLine + 1);
+      if (!title || !markDownHeaderRegex.test(title) || title.length < 8) {
+        alert(
+          'Post must have a title and the title must start with a header - "#" and end with a newline and have at least 8 characters.'
+        );
+      } else if (!body || body.length < 64) {
+        alert(
+          "Post must have a body and the body must have at least 64 characters."
+        );
+      } else {
+        setBody(body);
+        setTitle(title);
+      }
+    }
+  }, [preview]);
+
+  const publishPostHandler = async (values) => {
+    values.is_published = true;
     if (!post) {
-      const data = await createPost(values);
-      toast.success(data.message);
+      const response = await createPost(values);
+      toast.success(response.data.message);
       navigate("/dashboard/my_posts");
     } else {
-      const data = await editPost(post.id, values);
-      toast.success(data.message);
+      const response = await editPost(post.id, values);
+      toast.success(response.data.message);
       navigate("/dashboard/my_posts");
+    }
+  };
+
+  const savePostHandler = async (values) => {
+    if (!post) {
+      const response = await createPost(values);
+      toast.success(response.data.message);
+      navigate("/dashboard/my_drafts");
+    } else {
+      const response = await editPost(post.id, values);
+      toast.success(response.data.message);
+      navigate("/dashboard/my_drafts");
     }
   };
   const cancelHandler = () => {
@@ -87,9 +167,9 @@ export default function EditPost({ post, tags }) {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 md:p-6 xl:p-8 text-arsenic dark:text-white">
+    <div className="w-full max-w-6xl mx-auto text-arsenic dark:text-white">
       <h1 className="mb-2 md:mb-2 text-xl md:text-2xl xl:text-3xl font-semibold">
-        Create Post
+        {post ? "Edit" : "Create"} Article
       </h1>
       <div className="w-full p-4 md:p-6 rounded-xl bg-white dark:bg-dark-navy-blue">
         <div className="w-full flex items-center justify-end gap-2 md:gap-4">
@@ -107,11 +187,16 @@ export default function EditPost({ post, tags }) {
               preview ? "" : "opacity-75"
             } font-semibold cursor-pointer`}
           >
-            Preview
+            Full Preview
           </p>
         </div>
         {preview ? (
-          <RenderMarkDown title={title} body={body} header_url={header_url} />
+          <RenderMarkDown
+            title={title}
+            body={body}
+            header_url={header_url}
+            tags={subject_tags.map((tag) => tag.name)}
+          />
         ) : (
           <div className="w-full mt-1 md:mt-2">
             <div className="w-full flex flex-col items-center justify-center gap-4">
@@ -120,7 +205,7 @@ export default function EditPost({ post, tags }) {
                   className="w-48 h-full px-2 py-1 flex items-center justify-center cursor-pointer rounded-md font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 hover:bg-white hover:text-blue-500"
                   htmlFor="header_url"
                 >
-                  Fetch Header Image
+                  {header_url ? "Change" : "Upload"} Header Image
                   <input
                     name="header_url"
                     id="header_url"
@@ -132,7 +217,9 @@ export default function EditPost({ post, tags }) {
               </div>
             </div>
             {header_url ? (
-              <p className="mb-2 md:mb-4 font-medium">URL: {header_url}</p>
+              <p className="mb-2 md:mb-4 font-medium">
+                HEADER_URL: {baseURL + "/" + header_url}
+              </p>
             ) : file && file.size < 1048576 ? (
               <section className="w-full mb-2 md:mb-4">
                 File details:
@@ -155,21 +242,9 @@ export default function EditPost({ post, tags }) {
                     }
                   }}
                   type="button"
-                  disabled={isLoading}
-                  className={`w-36 px-2 py-1 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg ${
-                    !isLoading && "hover:bg-white hover:text-blue-500"
-                  }`}
+                  className="w-36 px-2 py-1 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
                 >
-                  {isLoading ? (
-                    <Bars
-                      height={22}
-                      width={22}
-                      ariaLabel="bars-loading"
-                      color="white"
-                    />
-                  ) : (
-                    "Upload Image"
-                  )}
+                  Upload Image
                 </button>
               </section>
             ) : file && file.size > 1048576 ? (
@@ -182,41 +257,33 @@ export default function EditPost({ post, tags }) {
             ) : null}
             <Formik
               initialValues={{
-                title: title,
-                body: body,
+                content: content,
               }}
-              validationSchema={postSchema}
               onSubmit={(values, { setSubmitting }) => {
-                submitFormHandler(values);
+                handlePostSubmit(values, "Publish");
                 setSubmitting(false);
               }}
             >
-              {({ values, setFieldValue }) => {
+              {({ values }) => {
                 return (
-                  <Form className="w-full mb-4 md:mb-8 flex flex-col gap-3 md:gap-4 items-center">
-                    <MyTextArea
-                      label="Title"
-                      name="title"
-                      type="text"
-                      placeholder="Title of your post......"
-                      value={values.title}
-                      height="h-12"
-                      onChange={(e) => {
-                        handleTitleChange(e);
-                        setFieldValue("title", e.target.value);
-                      }}
-                    />
-                    <MyTextArea
-                      label="Body"
-                      name="body"
-                      type="text"
-                      height="min-h-96"
-                      placeholder="Tell us what you have in mind......."
-                      value={values.body}
-                      onChange={(e) => {
-                        handleBodyChange(e);
-                        setFieldValue("body", e.target.value);
-                      }}
+                  <Form className="w-full my-4 md:my-6 xl:my-8 flex flex-col gap-1 md:gap-2 items-center">
+                    <div className="markdown-notice font-medium text-sm">
+                      <strong>Note:</strong> This editor supports Markdown for
+                      formatting. You can use **bold**, *italics*, [links](#),
+                      and more.{" "}
+                      <a
+                        href="https://www.markdownguide.org/cheat-sheet/"
+                        target="_blank"
+                        className="text-blue-500 hover:underline"
+                      >
+                        Learn more about Markdown
+                      </a>
+                      .
+                    </div>
+                    <SimpleMDE
+                      value={content}
+                      onChange={handleContentChange}
+                      className="w-full post_markdown"
                     />
                     <div className="w-full flex items-center gap-2">
                       {subject_tags.map((tag) => (
@@ -236,32 +303,29 @@ export default function EditPost({ post, tags }) {
                     <div className="w-full flex gap-4">
                       <button
                         type="submit"
-                        disabled={isLoading}
-                        className={`w-40 py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg ${
-                          !isLoading && "hover:bg-white hover:text-blue-500"
-                        }`}
+                        className="w-24 py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
                       >
-                        {isLoading ? (
-                          <Bars
-                            height={22}
-                            width={22}
-                            ariaLabel="bars-loading"
-                            color="white"
-                          />
-                        ) : (
-                          <>{post ? "Update" : "Publish"}</>
-                        )}
+                        {post && post.is_published ? "Update" : "Publish"}
                       </button>
+                      {!post.is_published && (
+                        <button
+                          type="button"
+                          onClick={() => handlePostSubmit(values, "Save")}
+                          className="w-36 py-2 flex items-center justify-center font-medium bg-green-500 text-white border border-green-500 dark:border-0 rounded-lg hover:bg-white hover:text-green-500"
+                        >
+                          Save to drafts
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={cancelHandler}
-                        className="w-32 py-2 flex items-center justify-center font-medium bg-black dark:bg-white text-white dark:text-black border border-black dark:border-0 rounded-lg hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white"
+                        className="w-28 py-2 flex items-center justify-center font-medium bg-black dark:bg-white text-white dark:text-black border border-black dark:border-0 rounded-lg hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white"
                       >
                         Cancel
                       </button>
                       {post && (
                         <button
-                        type="button"
+                          type="button"
                           onClick={async (e) => {
                             e.preventDefault();
                             if (
@@ -271,7 +335,7 @@ export default function EditPost({ post, tags }) {
                             ) {
                               const response = await deleteMyPost(post.id);
                               if (response) {
-                                navigate("/dashboard/my_posts");
+                                navigate("/dashboard");
                               }
                             }
                           }}
