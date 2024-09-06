@@ -128,6 +128,7 @@ def get_post(post_id=None):
                     'likes': len(article.liked_by),
                     'author': {'first_name': article.author.first_name,
                                'last_name': article.author.last_name,
+                               'bio': article.author.bio,
                                'id': article.author.id,
                                'avatar_url': article.author.avatar_url,
                                'email': article.author.email}}), 200

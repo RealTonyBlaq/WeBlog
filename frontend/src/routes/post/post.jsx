@@ -37,7 +37,7 @@ const RenderPostMarkDown = () => {
     data,
     page: Number(page),
     total_pages: Number(total_pages),
-    order: 'oldest'
+    order: "oldest",
   });
   const [showCommentsOrderList, setShowCommentsOrderList] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -120,18 +120,14 @@ const RenderPostMarkDown = () => {
   const handleHideCommentsOrderList = () => setShowCommentsOrderList(false);
 
   const handleCommentOrderChange = async (order) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetchPostComments(
-        post.id,
-        order,
-        comments.page
-      );
+      const response = await fetchPostComments(post.id, order, comments.page);
       if (response) {
         setComment((prev) => ({
           ...prev,
           data: response.data.comments,
-          order
+          order,
         }));
       }
     } catch (e) {
@@ -211,9 +207,9 @@ const RenderPostMarkDown = () => {
             <p className="text-sm">{pageLikes}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center justify-center">
+            {/* <button className="flex items-center justify-center">
               <span className="icon-[ion--share-outline]"></span>
-            </button>
+            </button> */}
             <button
               onClick={handleBookmark}
               className="flex items-center justify-center"
@@ -225,6 +221,10 @@ const RenderPostMarkDown = () => {
               )}
             </button>
           </div>
+        </div>
+        <div className="w-full mb-4 md:mb-8">
+          <h2 className="font-semibold text-lg md:text-xl capitalize">About the author</h2>
+          <p className="">{author.bio}</p>
         </div>
         <div className="w-full">
           <p className="md:text-lg xl:text-xl font-semibold">Comments</p>
@@ -282,7 +282,7 @@ const RenderPostMarkDown = () => {
                   <li
                     key={order}
                     onClick={() => {
-                      setComment(prev => ({...prev, order: order}));
+                      setComment((prev) => ({ ...prev, order: order }));
                       handleCommentOrderChange(order);
                       handleHideCommentsOrderList();
                     }}

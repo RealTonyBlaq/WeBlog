@@ -87,6 +87,7 @@ export const resetPasswordSchema = yup.object().shape({
 export const updateProfileSchema = yup.object().shape({
   first_name: yup.string(),
   last_name: yup.string(),
+  bio: yup.string(),
   email: yup
     .string()
     .email()

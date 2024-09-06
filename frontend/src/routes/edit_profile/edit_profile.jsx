@@ -1,7 +1,7 @@
 import { Form, Formik } from "formik";
 import { updateProfileSchema } from "../../lib/utils";
 import { useNavigate } from "react-router-dom";
-import { MyTextInput } from "../../ui/form-input";
+import { MyTextArea, MyTextInput } from "../../ui/form-input";
 import { Bars, TailSpin } from "react-loader-spinner";
 import { updateProfile } from "../../api/auth";
 import { useAuth } from "../../lib/useAuth";
@@ -52,6 +52,7 @@ export default function EditMyProfile() {
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
+            bio: user.bio
           }}
           validationSchema={updateProfileSchema}
           onSubmit={(values, { setSubmitting }) => {
@@ -79,6 +80,12 @@ export default function EditMyProfile() {
                   name="email"
                   type="email"
                   placeholder="oowoga@gmail.com.com"
+                />
+                <MyTextArea
+                  label="Bio"
+                  name="bio"
+                  type="text"
+                  placeholder="Tell us about yourself..."
                 />
                 <div className="w-full flex items-center justify-center gap-2">
                   <button

@@ -3,7 +3,7 @@
 
 from datetime import datetime
 from flask_login import UserMixin
-from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy import Column, String, Boolean, DateTime, TEXT
 from sqlalchemy.orm import relationship
 from models.associations import bookmarks, user_tag, comment_likes, liked_posts
 from models.base import BaseClass, Base
@@ -15,6 +15,7 @@ class User(UserMixin, BaseClass, Base):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     email = Column(String(60), nullable=False, unique=True)
+    bio = Column(TEXT, nullable=True)
     last_login = Column(DateTime, default=datetime.now())
     password = Column(String(60), nullable=False)
     is_logged_in = Column(Boolean, default=False)
