@@ -307,7 +307,7 @@ export default function EditPost({ post, tags }) {
                       >
                         {post && post.is_published ? "Update" : "Publish"}
                       </button>
-                      {!post.is_published && (
+                      {post && !post.is_published && (
                         <button
                           type="button"
                           onClick={() => handlePostSubmit(values, "Save")}
