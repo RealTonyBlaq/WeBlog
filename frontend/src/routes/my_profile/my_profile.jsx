@@ -6,6 +6,8 @@ import { Oval, TailSpin } from "react-loader-spinner";
 import { updateProfile } from "../../api/auth";
 import toast from "react-hot-toast";
 
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
 export default function MyProfilePage() {
   const { user, setUser } = useAuth();
   const [file, setFile] = useState(null);
@@ -26,6 +28,8 @@ export default function MyProfilePage() {
         />
       </div>
     );
+
+    const dateJoined = new Date(user.created_at)
 
   const handleAvatarChange = async (e) => {
     if (e.target.files) {
@@ -128,7 +132,7 @@ export default function MyProfilePage() {
               </p>
             </div>
           ) : null}
-          <div className="w-full grid md:grid-cols-2 gap-4 lg:gap-6 mt-4 md:mt-6">
+          <div className="w-full grid md:grid-cols-2 gap-2 lg:gap-4 mt-4 md:mt-6">
             <div className="">
               <p className="">First Name</p>
               <p className="font-medium">{user.first_name}</p>
@@ -141,10 +145,14 @@ export default function MyProfilePage() {
               <p className="">Email</p>
               <p className="font-medium">{user.email}</p>
             </div>
-            {/* <div className="">
+            <div className="">
+              <p className="">Joined</p>
+              <p className="font-medium">{months[dateJoined.getMonth()]} {dateJoined.getFullYear()}</p>
+            </div>
+            <div className="">
               <p className="">Bio</p>
-              <p className="font-medium">Full stack web developer</p>
-            </div> */}
+              <p className="font-medium min-h-10">{user.bio || 'N/A'}</p>
+            </div>
           </div>
           <div className="w-full mt-4 md:mt-6 xl:mt-8 flex items-center justify-end gap-1 md:gap-2">
             <Link
