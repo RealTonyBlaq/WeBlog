@@ -22,6 +22,7 @@ export default function Login() {
       navigate("/")
     } else {
       toast.error(response.message)
+      if (response.message === 'Please complete email verification') navigate("/resend_conf_email")
     }
     setIsLoading(false)
   };
