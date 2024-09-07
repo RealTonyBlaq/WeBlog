@@ -71,6 +71,15 @@ export const deleteMyPost = async (post_id) => {
   }
 };
 
+export const deletePost = async (post_id) => {
+  try {
+    const data = await Axios.delete(`${baseURL}/api/v1/posts/${post_id}`);
+    return data;
+  } catch (e) {
+    errorHandler(e);
+  }
+};
+
 export const createPost = async (payload) => {
   try {
     const data = await Axios.post(`/api/v1/my_posts`, payload);
