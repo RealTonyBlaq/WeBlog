@@ -3,9 +3,10 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import "./index.css";
+import { Toaster } from "react-hot-toast";
+// pages
 import GeneralLayout from "./ui/general-layout";
 import Login from "./routes/login/login";
-import { Toaster } from "react-hot-toast";
 import SignUp from "./routes/signup/signup";
 import ResetPassword from "./routes/reset_password/reset_password";
 import ForgotPassword from "./routes/forgot_password/forgot_password";
@@ -24,6 +25,9 @@ import RenderPostMarkDown from "./routes/post/post";
 import EditPostPage from "./routes/edit_posts/edit_posts";
 import ErrorPage from "./error-page";
 import QueryPostsPage from "./routes/search/search";
+import MyDraftsPage from "./routes/my_drafts/my_drafts";
+import AdminDashboard from "./routes/admin/admin";
+import AdminTagsPage from "./routes/admin_tags/admin_tags";
 // loaders
 import { loader as HomeLoader } from "./routes/home/loader";
 import { loader as PostLoader } from "./routes/post/loader";
@@ -33,9 +37,14 @@ import { loader as myDraftsLoader } from "./routes/my_drafts/loader"
 import { loader as editPostLoader } from "./routes/edit_posts/loader";
 import { loader as bookmarksLoader } from "./routes/my_bookmarks/loader";
 import { loader as searchLoader } from "./routes/search/loader";
+import { loader as tagDataLoader } from "./routes/tag/loader"
+import { loader as editTagDataLoader } from "./routes/edit_tag/loader";
 // actions
 import { action as DeletePost } from "./routes/delete_post/action";
-import MyDraftsPage from "./routes/my_drafts/my_drafts";
+import CreateTagPage from "./routes/create_tag/create_tag";
+import TagPage from "./routes/tag/tag";
+import EditTagPage from "./routes/edit_tag/edit_tag";
+
 
 const queryClient = new QueryClient();
 
@@ -94,6 +103,30 @@ const router = createBrowserRouter([
       {
         path: "resend_conf_email",
         element: <ResendConfirmationEmail />,
+      },
+      {
+        path: "admin",
+        element: <AdminDashboard />,
+        children: [
+          {
+            path: 'tags',
+            element: <AdminTagsPage />,
+          },
+          {
+            path: 'tags/:id',
+            element: <TagPage />,
+            loader: tagDataLoader
+          },
+          {
+            path: 'tags/:id/edit',
+            element: <EditTagPage />,
+            loader: editTagDataLoader
+          },
+          {
+            path: 'create_tag',
+            element: <CreateTagPage />,
+          }
+        ]
       },
       {
         path: "dashboard",
@@ -155,7 +188,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <Toaster
-        position="top-right"
+        position="bottom-right"
         reverseOrder={false}
         containerClassName="overflow-auto"
       />
