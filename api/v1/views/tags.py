@@ -3,10 +3,12 @@ from api.v1.views import app_views, admin_required
 from flask import jsonify, request
 from flask_login import login_required
 from models.tag import Tag
+from models.post import Post
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_
 from utils import db
-from utils.get_all import get_model_instances
 from werkzeug.exceptions import BadRequest
+import math
 
 
 @app_views.route("/tags", methods=["GET"], strict_slashes=False)
@@ -25,11 +27,107 @@ def view_tags(tag_id=None):
             return jsonify({'tag': tag.to_dict()}), 200
 
         # get all tags
-        tags = db.query(Tag).all()
-        # response, code =  get_model_instances(Tag)
-        return jsonify({'tags': [tag.to_dict() for tag in tags]}), 200
+        from api.v1.app import executor
+        # get page number
+        page = request.args.get('page', type=int, default=1)
+        # get limit number
+        limit = request.args.get('limit', type=int, default=20)
+        # get search parameter
+        q = request.args.get('q', type=str, default='')
+
+        if page < 1 or limit < 1:
+            return jsonify({'message': 'Page number\
+                        or limit should not be less than 1'}), 400
+
+        # calculate start and end
+        start = limit * (page - 1)
+
+        query = db.query(Tag)
+        if q:
+            search = f'%{q}%'
+            print(search)
+            query = db.query(Tag).filter(Tag.name.like(search))
+
+        futures = [
+            executor.submit(query.slice, start, start + limit),
+            executor.submit(query.count)
+            ]
+        objs = futures[0].result()
+        count = futures[1].result()
+
+        # list to be returned
+        objs_list = []
+        # add tags and number of comments to each object
+        for obj in objs:
+            new_obj = obj.to_dict()
+            new_obj['no_posts'] = len(obj.posts)
+            objs_list.append(new_obj)
+
+        total_pages = math.ceil(count / limit)
+
+        if page != 1 and page > total_pages:
+            return ({'message': 'Page out of range'}, 404)
+
+        return jsonify({'tags': objs_list, 'page': f'{page}',
+             'total_pages': f"{total_pages}"}), 200
 
 
+@app_views.route('/tags/<tag_id>/posts', methods=['GET'], strict_slashes=False)
+@admin_required
+@login_required
+def tag_posts(tag_id=None):
+    """
+    **API endpoint for published articles associated with a tag**
+
+    GET - returns all published articles associated with this tag
+    """
+    if request.method == 'GET':
+        from api.v1.app import executor
+        # return all articles associated with this tag
+        # get page number
+        page = request.args.get('page', type=int, default=1)
+        # get limit number
+        limit = request.args.get('limit', type=int, default=10)
+
+        if page < 1 or limit < 1:
+            return ({'message': 'Page number\
+                     or limit should not be less than 1'}, 400)
+
+        # calculate start and end
+        start = limit * (page - 1)
+
+        query = db.query(Post).join(Post.tags).filter(and_(Post.is_published == True, Tag.id == tag_id))
+
+        futures = [
+            executor.submit(query.slice, start, start + limit),
+            executor.submit(query.count)
+            ]
+        objs = futures[0].result()
+        count = futures[1].result()
+
+        # list to be returned
+        objs_list = []
+        # add tags and number of comments to each object
+        for obj in objs:
+            new_obj = obj.to_dict()
+            if new_obj.get('__class__') == 'Post':
+                new_obj['author'] = f"{obj.author.first_name} \
+                    {obj.author.last_name}"
+                new_obj['author_avatar'] = obj.author.avatar_url
+                new_obj['no_of_comments'] = len(obj.comments)
+                new_obj['no_of_likes'] = len(obj.liked_by)
+                new_obj['tags'] = [tag.name for tag in obj.tags]
+            objs_list.append(new_obj)
+
+        total_pages = math.ceil(count / limit)
+
+        if page != 1 and page > total_pages:
+            return ({'message': 'Page out of range'}, 404)
+
+        return jsonify({'data': objs_list, 'page': f'{page}',
+             'total_pages': f"{total_pages}"}), 200
+
+    
 @app_views.route("/tags", methods=["POST"], strict_slashes=False)
 @app_views.route("/tags/<tag_id>",
                  methods=["GET", "PATCH", "DELETE"], strict_slashes=False)
