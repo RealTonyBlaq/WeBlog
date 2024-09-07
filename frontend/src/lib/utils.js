@@ -109,3 +109,7 @@ export const postSchema = yup.object().shape({
 export const commentSchema = yup.object().shape({
   content: yup.string().min(8).required("Content is required"),
 });
+
+export const tagSchema = yup.object().shape({
+  name: yup.string().min(3).required("Name is required"),
+});
