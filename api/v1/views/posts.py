@@ -150,4 +150,4 @@ def delete_post(post_id=None):
         return jsonify({'message': 'Post with id not found'}), 404
 
     post.delete()
-    return jsonify({}), 200
+    return jsonify({'message': 'Post deleted successfully'}), 200
