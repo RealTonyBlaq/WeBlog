@@ -23,7 +23,7 @@ export default function TagPage() {
     <div className="w-full h-full p-4 md:px-6 dark:text-white">
       <div
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 font-medium md:text-lg mb-1 md:mb-2 cursor-pointer dark:text-white hover:text-blue-500"
+        className="w-16 flex items-center gap-2 font-medium md:text-lg mb-1 md:mb-2 cursor-pointer dark:text-white hover:text-blue-500"
       >
         <span className="icon-[ion--play-back] text-xl"></span> Back
       </div>
