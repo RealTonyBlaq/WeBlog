@@ -1,4 +1,4 @@
-"""Defines the User routes"""
+"""Defines the User routes for admin"""
 from api.v1.views import app_views, admin_required
 from bcrypt import gensalt, hashpw
 from flask import jsonify, request
@@ -59,7 +59,7 @@ def view_users(user_id=None):
         query = db.query(User)
         if q:
             search = f'%{q}%'
-            query = db.query(User).filter(User[by].like(search))
+            query = query.filter(getattr(User, by).like(search))
 
         futures = [
             executor.submit(query.slice, start, start + limit),
