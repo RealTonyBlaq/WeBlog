@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Form, useNavigate } from "react-router-dom";
-import { addToBookmark, removeFromBookmark } from "../api/posts";
+import { addToBookmark, deletePost, removeFromBookmark } from "../api/posts";
 import { useAuth } from "../lib/useAuth";
 import toast from "react-hot-toast";
 import DOMPurify from "dompurify";
@@ -17,6 +17,7 @@ export default function PostCard({
   tags,
   author_avatar,
   is_published,
+  setPosts
 }) {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
@@ -93,9 +94,7 @@ export default function PostCard({
             <p className="font-medium text-sm">
               {no_of_comments || 0} Comments
             </p>
-            <p className="font-medium text-sm">
-              {no_of_likes || 0} Likes
-            </p>
+            <p className="font-medium text-sm">{no_of_likes || 0} Likes</p>
           </div>
           {user ? (
             <div className="flex items-center gap-1 md:gap-2 text-lg">
@@ -130,7 +129,26 @@ export default function PostCard({
                   </Form>
                 </>
               )}
-              {is_published && (
+              {user && user.is_admin && (
+                <button
+                  onClick={async(e) => {
+                    e.stopPropagation();
+                    if (
+                      confirm("Are you sure you want to delete this post?")
+                    ) {
+                      const response = await deletePost(id)
+                      if (response) {
+                        toast.success(response.data.message)
+                        setPosts(prev => prev.filter(post => post.id != id))
+                      }
+                    }
+                  }}
+                  className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
+                >
+                  <span className="icon-[ic--outline-delete] block"></span>
+                </button>
+              )}
+              {is_published && !user.is_admin && (
                 <button
                   onClick={handleBookmark}
                   className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
