@@ -44,6 +44,7 @@ import { action as DeletePost } from "./routes/delete_post/action";
 import CreateTagPage from "./routes/create_tag/create_tag";
 import TagPage from "./routes/tag/tag";
 import EditTagPage from "./routes/edit_tag/edit_tag";
+import AdminUsersPage from "./routes/admin_users/admin_users";
 
 
 const queryClient = new QueryClient();
@@ -108,6 +109,10 @@ const router = createBrowserRouter([
         path: "admin",
         element: <AdminDashboard />,
         children: [
+          {
+            path: 'users',
+            element: <AdminUsersPage />,
+          },
           {
             path: 'tags',
             element: <AdminTagsPage />,
