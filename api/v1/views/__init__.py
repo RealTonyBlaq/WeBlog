@@ -56,3 +56,4 @@ from api.v1.views.me import *
 from api.v1.views.tags import *
 from api.v1.views.comment import *
 from api.v1.views.posts import *
+from api.v1.views.users import *

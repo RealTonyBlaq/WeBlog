@@ -20,7 +20,7 @@ class User(UserMixin, BaseClass, Base):
     password = Column(String(60), nullable=False)
     is_logged_in = Column(Boolean, default=False)
     is_email_verified = Column(Boolean, default=False)
-    username = Column(String(25), nullable=True, unique=True)
+    # username = Column(String(25), nullable=True, unique=True)
     avatar_url = Column(String(100), nullable=True)
     # added attribute for checking role
     is_admin = Column(Boolean, default=False)
