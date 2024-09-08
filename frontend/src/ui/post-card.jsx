@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Form, useNavigate } from "react-router-dom";
-import { addToBookmark, deletePost, removeFromBookmark } from "../api/posts";
+import { addToBookmark, deletePost as delPost, removeFromBookmark } from "../api/posts";
 import { useAuth } from "../lib/useAuth";
 import toast from "react-hot-toast";
 import DOMPurify from "dompurify";
@@ -17,7 +17,7 @@ export default function PostCard({
   tags,
   author_avatar,
   is_published,
-  setPosts
+  deletePost
 }) {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
@@ -136,10 +136,10 @@ export default function PostCard({
                     if (
                       confirm("Are you sure you want to delete this post?")
                     ) {
-                      const response = await deletePost(id)
+                      const response = await delPost(id)
                       if (response) {
                         toast.success(response.data.message)
-                        setPosts(prev => prev.filter(post => post.id != id))
+                        deletePost(id)
                       }
                     }
                   }}
