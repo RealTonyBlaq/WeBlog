@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import TagButton from "../../ui/tag-button";
 import { deleteTag, fetchTags } from "../../api/tags";
 import { ThreeCircles } from "react-loader-spinner";
@@ -13,7 +13,6 @@ export default function AdminTagsPage() {
   });
   const [search, setSearch] = useState("");
   const [isLoading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => setSearch(e.target.value);
 

@@ -39,11 +39,14 @@ import { loader as bookmarksLoader } from "./routes/my_bookmarks/loader";
 import { loader as searchLoader } from "./routes/search/loader";
 import { loader as tagDataLoader } from "./routes/tag/loader"
 import { loader as editTagDataLoader } from "./routes/edit_tag/loader";
+import { loader as userDataLoader } from "./routes/user/loader"
 // actions
 import { action as DeletePost } from "./routes/delete_post/action";
 import CreateTagPage from "./routes/create_tag/create_tag";
 import TagPage from "./routes/tag/tag";
 import EditTagPage from "./routes/edit_tag/edit_tag";
+import AdminUsersPage from "./routes/admin_users/admin_users";
+import UserPage from "./routes/user/user";
 
 
 const queryClient = new QueryClient();
@@ -108,6 +111,15 @@ const router = createBrowserRouter([
         path: "admin",
         element: <AdminDashboard />,
         children: [
+          {
+            path: 'users',
+            element: <AdminUsersPage />,
+          },
+          {
+            path: 'users/:id',
+            element: <UserPage />,
+            loader: userDataLoader
+          },
           {
             path: 'tags',
             element: <AdminTagsPage />,

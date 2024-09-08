@@ -1,24 +1,22 @@
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
-import { deleteTag, fetchTagPosts } from "../../api/tags";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { AdminDisplayPosts } from "../../ui/admin-display-posts";
+import { deleteUser, fetchUserPosts, makeUserAdmin } from "../../api/users";
 import { useEffect, useState } from "react";
+import { AdminDisplayPosts } from "../../ui/admin-display-posts";
 
-export default function TagPage() {
-  const { tag, postsData } = useLoaderData();
+export default function UserPage() {
+  const { user, postsData } = useLoaderData();
 
   const [posts, setPosts] = useState(postsData);
+  const [is_admin, setIsAdmin] = useState(user.is_admin);
   const [search, setSearch] = useState("");
-
-  const navigate = useNavigate();
-  const fetchPosts = (page) => fetchTagPosts(tag.id, page);
 
   const handleChange = (e) => setSearch(e.target.value);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetchTagPosts(tag.id, 1, search);
+      const response = await fetchUserPosts(user.id, 1, search);
       if (response) {
         // console.log(response.data);
         setPosts(response.data);
@@ -28,26 +26,43 @@ export default function TagPage() {
     }
   };
 
+  const navigate = useNavigate();
+  const fetchPosts = (page) => fetchUserPosts(user.id, page, search);
+
+  const handleSetAdmin = async () => {
+    if (
+      confirm(
+        "Are you sure you want to give this user administrative privileges?"
+      )
+    ) {
+      const response = await makeUserAdmin(user.id);
+      if (response) {
+        toast.success(response.data.message);
+        setIsAdmin(true);
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (confirm("Are you sure you want to delete this user?")) {
+      const response = await deleteUser(userId);
+      if (response) {
+        toast.success(response.data.message);
+        navigate("/admin/users");
+      }
+    }
+  };
+
   useEffect(() => {
     if (!search) {
       (async () => {
-        const response = await fetchTagPosts(tag.id);
+        const response = await fetchUserPosts(user.id);
         if (response) {
           setPosts(response.data);
         }
       })();
     }
   }, [search]);
-
-  const handleDeleteTag = async () => {
-    if (confirm("Are you sure you want to delete this tag?")) {
-      const response = await deleteTag(tag.id);
-      if (response) {
-        toast.success(response.data.message);
-        navigate(-1);
-      }
-    }
-  };
 
   return (
     <div className="w-full h-full p-4 md:px-6 dark:text-white">
@@ -60,20 +75,28 @@ export default function TagPage() {
       <div className="w-full flex items-center justify-between">
         <div>
           <h1 className="font-semibold text-xl md:text-2xl xl:text-3xl">
-            Tag: <span>{tag.name}</span>
+            {`${user.first_name} ${user.last_name}`}
           </h1>
-          <p className="font-medium">ID: {tag.id}</p>
+          <p className="font-medium">Email: {user.email}</p>
+          <p className="font-medium">ID: {user.id}</p>
         </div>
         <div className="flex items-center gap-1 md:gap-2">
-          <Link
-            to={`/admin/tags/${tag.id}/edit`}
-            className="flex items-center gap-1 p-1 md:px-2 font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
-          >
-            <span className="icon-[mingcute--edit-line]"></span>
-            <span className="hidden md:block">Edit</span>
-          </Link>
+          {is_admin ? (
+            <p className="font-semibold flex items-center gap-1 md:gap-2">
+              <span className="icon-[ri--admin-fill]"></span>
+              <span className="hidden md:block">Administrator</span>
+            </p>
+          ) : (
+            <button
+              onClick={handleSetAdmin}
+              className="flex items-center gap-1 p-1 md:px-2 font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+            >
+              <span className="icon-[ri--admin-fill]"></span>
+              <span className="hidden md:block">Make Admin</span>
+            </button>
+          )}
           <button
-            onClick={handleDeleteTag}
+            onClick={handleDeleteUser}
             className="flex items-center gap-1 p-1 md:px-2 font-medium bg-red-500 text-white border border-red-500 dark:border-0 rounded-lg hover:bg-white hover:text-red-500"
           >
             <span className="icon-[ic--outline-delete]"></span>
@@ -107,11 +130,15 @@ export default function TagPage() {
           Associated Posts
         </h2>
         {posts.data.length ? (
-          <AdminDisplayPosts posts={posts} setPosts={setPosts} fetchData={fetchPosts} />
-        ) :  !posts.data.length && search ? (
+          <AdminDisplayPosts
+            posts={posts}
+            setPosts={setPosts}
+            fetchData={fetchPosts}
+          />
+        ) : !posts.data.length && search ? (
           <p>No posts match your search.</p>
         ) : (
-          <p>There are no articles linked with this tag yet.</p>
+          <p>There are no articles linked with this user yet.</p>
         )}
       </div>
     </div>
