@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { ThreeCircles } from "react-loader-spinner";
-import toast from "react-hot-toast";
 import { fetchUsers } from "../../api/users";
-import { deleteUser } from "../../api/users";
 import UserCard from "../../ui/user-card";
 import { useOutsideClick } from "../../lib/useOutsideClick";
 
@@ -43,19 +41,6 @@ export default function AdminUsersPage() {
   const handleHideSearchByList = () => setShowSearchByList(false);
 
   const ref = useOutsideClick(handleHideSearchByList);
-
-  const handleDeleteUser = async (userId) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      const response = await deleteUser(userId);
-      if (response) {
-        toast.success(response.data.message);
-        setusersData((prev) => ({
-          ...prev,
-          data: prev.data.filter((user) => user.id != userId),
-        }));
-      }
-    }
-  };
 
   const handlePage = (number) => {
     if (number < 0) {
