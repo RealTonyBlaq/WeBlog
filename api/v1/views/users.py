@@ -12,16 +12,16 @@ from werkzeug.exceptions import BadRequest
 import math
 
 
-@app_views.route("/users", methods=["GET", "POST"], strict_slashes=False)
-@app_views.route("/users/<user_id>", methods=["GET", "DELETE"], strict_slashes=False)
+@app_views.route("/users", methods=["GET"], strict_slashes=False)
+@app_views.route("/users/<user_id>", methods=["GET", "PATCH", "DELETE"], strict_slashes=False)
 @login_required
 @admin_required
 def view_users(user_id=None):
     """
     GET - returns all users
-    POST - creates a user with admin privileges
     - user_id
         GET - return user with id user_id
+        PATCH - gives a user admin privileges
         DELETE - deletes a user
     """
     if request.method == "GET":
@@ -83,67 +83,19 @@ def view_users(user_id=None):
         return jsonify({'users': objs_list, 'page': f'{page}',
              'total_pages': f"{total_pages}"}), 200
     
-    if request.method == "POST":
-        if not request.is_json:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-
+    if request.method == "PATCH":
+        # find user with user_id
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({'message': f'User-{user_id} not found'}), 404
         try:
-            data = request.get_json()
-        except BadRequest:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-
-        if not data:
-            return jsonify({'message': 'Empty dataset'}), 400
-        
-        # check that all required attributes are present
-        email = data.get('email').strip()
-        password = data.get('password').strip()
-        confirm_password = data.get('confirm_password').strip()
-        first_name = data.get('first_name').strip()
-        last_name = data.get('last_name').strip()
-
-        if not email or len(email) == 0:
-            return jsonify({'message': 'Missing email'}), 400
-        # check that email is valid
-        # if not await verify_email(email):
-        #     return jsonify({'message': 'Invalid email'}), 400
-
-        if not password or len(password) == 0:
-            return jsonify({'message': 'Missing password'}), 400
-        if not confirm_password or len(confirm_password) == 0:
-            return jsonify({'message': 'Missing confirm_password'}), 400
-        # check that password and confirm_password match
-        if password != confirm_password:
-            return jsonify({'message': 'Passwords do not match'}), 400
-
-        if not first_name or len(first_name) == 0:
-            return jsonify({'message': 'Missing first_name'}), 400
-        if not last_name or len(last_name) == 0:
-            return jsonify({'message': 'Missing last_name'}), 400
-
-        # check that email is not already in use
-        existing_user = db.query(User).filter(User.email == email).first()
-        if existing_user:
-            return jsonify({'message': 'Email already in use'}), 400
-
-        # hash users password
-        salt = gensalt()
-        hashed_password = hashpw(password.encode('utf-8'), salt)
-
-        # create user
-        user = User(
-            email=email, password=hashed_password,
-            first_name=first_name, last_name=last_name,
-            is_email_verified=True, is_admin=True
-        )
-        try:
-            db.add(user)
-            db.save()
+            user.is_admin = True
+            user.save()
         except IntegrityError:
-            return jsonify({'message': 'Database integrity error'})
+            return jsonify({'message': 'Database error'}), 500
 
-        msg = 'Admin created successfully.'
-        return jsonify({'message': msg}), 201
+        msg = 'User now has admin privileges.'
+        return jsonify({'message': msg}), 200
     
     if request.method == 'DELETE':
         # delete user
@@ -205,7 +157,7 @@ def user_posts(user_id=None):
                 new_obj['author_avatar'] = obj.author.avatar_url
                 new_obj['no_of_comments'] = len(obj.comments)
                 new_obj['no_of_likes'] = len(obj.liked_by)
-                new_obj['users'] = [user.name for user in obj.users]
+                new_obj['tags'] = [tag.name for tag in obj.tags]
             objs_list.append(new_obj)
 
         total_pages = math.ceil(count / limit)
