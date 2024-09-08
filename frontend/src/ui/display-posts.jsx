@@ -53,7 +53,6 @@ export default function DisplayPosts({ posts, fetchData }) {
             no_of_comments={post.no_of_comments}
             no_of_likes={post.no_of_likes}
             is_published={post.is_published}
-            setPosts={setPosts}
           />
         ))}
       </div>
