@@ -57,7 +57,7 @@ export default function AdminDashboard() {
           ))}
         </ul>
       </nav>
-      <div className="w-full h-full overflow-y-scroll px-6 py-4 md:p-0">
+      <div id="scrollableDiv" className="w-full h-full overflow-y-scroll px-6 py-4 md:p-0">
         <Outlet />
       </div>
     </div>
