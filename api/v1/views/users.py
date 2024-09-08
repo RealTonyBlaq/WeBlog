@@ -1,6 +1,5 @@
 """Defines the User routes for admin"""
 from api.v1.views import app_views, admin_required
-from bcrypt import gensalt, hashpw
 from flask import jsonify, request
 from flask_login import login_required
 from models.post import Post
@@ -8,7 +7,6 @@ from models.user import User
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_
 from utils import db
-from werkzeug.exceptions import BadRequest
 import math
 
 
