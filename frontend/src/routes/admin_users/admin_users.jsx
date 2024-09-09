@@ -23,7 +23,7 @@ export default function AdminUsersPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetchUsers(1, search, searchBy);
       if (response) {
@@ -36,7 +36,7 @@ export default function AdminUsersPage() {
     } catch (e) {
       console.error(e);
     }
-    setLoading(false)
+    setLoading(false);
   };
 
   const handleShowSearchByList = () => setShowSearchByList(true);
@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
       setLoading(true);
       try {
         const response = await fetchUsers(usersData.page, search);
-        if (response) {            
+        if (response) {
           setusersData((prev) => ({
             ...prev,
             data: response.data.users,
@@ -120,7 +120,9 @@ export default function AdminUsersPage() {
           <ul
             ref={ref}
             className={`w-20 md:w-40 ${
-              showSearchByList ? "absolute -bottom-[128px] left-0 z-10" : "hidden"
+              showSearchByList
+                ? "absolute -bottom-[128px] left-0 z-10"
+                : "hidden"
             } p-2 md:p-3 bg-slate-50 dark:bg-dark-navy-blue shadow rounded md:rounded-lg`}
           >
             {searchByList.map((option) => (
@@ -128,7 +130,7 @@ export default function AdminUsersPage() {
                 key={option}
                 onClick={() => {
                   handleSearchByChange(option);
-                  handleHideSearchByList()
+                  handleHideSearchByList();
                 }}
                 className="flex items-center justify-between cursor-pointer font-medium py-1 px-2 hover:bg-arsenic hover:text-white rounded capitalize"
               >
@@ -143,7 +145,11 @@ export default function AdminUsersPage() {
       </div>
       <div className="w-full py-2 md:p-3">
         {isLoading ? (
-          Array.from({ length: 4}).map((_, i) => <UserCardSkeleton key={i} />)
+          <div className="w-full flex items-center flex-wrap gap-2 md:gap-4 mb-4 md:mb-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <UserCardSkeleton key={i} />
+            ))}
+          </div>
         ) : (
           <>
             {!usersData.data.length && search ? (

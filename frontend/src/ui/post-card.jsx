@@ -57,7 +57,7 @@ export default function PostCard({
         <img
           src={`/${header_url}`}
           alt="post image"
-          className="w-full h-40 rounded-t-md"
+          className="w-full h-20 md:h-40 rounded-t-md"
         />
       ) : null}
       <div className="w-full p-4 md:p-6">
