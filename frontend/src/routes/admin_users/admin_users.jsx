@@ -177,7 +177,7 @@ export default function AdminUsersPage() {
           {usersData.page - 2 > 0 && (
             <button
               onClick={() => handlePage(-2)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {usersData.page - 2}
             </button>
@@ -185,16 +185,16 @@ export default function AdminUsersPage() {
           {usersData.page - 1 > 0 && (
             <button
               onClick={() => handlePage(-1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {usersData.page - 1}
             </button>
           )}
-          <p className="font-bold">{usersData.page}</p>
+          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">{usersData.page}</p>
           {usersData.page + 1 <= usersData.totalPages && (
             <button
               onClick={() => handlePage(1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {usersData.page + 1}
             </button>
@@ -202,7 +202,7 @@ export default function AdminUsersPage() {
           {usersData.page + 2 <= usersData.totalPages && (
             <button
               onClick={() => handlePage(1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {usersData.page + 2}
             </button>

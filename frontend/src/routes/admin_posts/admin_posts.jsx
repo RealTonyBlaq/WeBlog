@@ -199,7 +199,7 @@ export default function AdminPostsPage() {
           {postsData.page - 2 > 0 && (
             <button
               onClick={() => handlePage(-2)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {postsData.page - 2}
             </button>
@@ -207,16 +207,16 @@ export default function AdminPostsPage() {
           {postsData.page - 1 > 0 && (
             <button
               onClick={() => handlePage(-1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {postsData.page - 1}
             </button>
           )}
-          <p className="font-bold">{postsData.page}</p>
+          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">{postsData.page}</p>
           {postsData.page + 1 <= postsData.totalPages && (
             <button
               onClick={() => handlePage(1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {postsData.page + 1}
             </button>
@@ -224,7 +224,7 @@ export default function AdminPostsPage() {
           {postsData.page + 2 <= postsData.totalPages && (
             <button
               onClick={() => handlePage(1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {postsData.page + 2}
             </button>

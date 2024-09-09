@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import TagButton from "../../ui/tag-button";
 import { deleteTag, fetchTags } from "../../api/tags";
-import { ThreeCircles } from "react-loader-spinner";
 import toast from "react-hot-toast";
+import TagButtonSkeleton from "../../ui/skeletons/tag-button-skeleton";
 
 export default function AdminTagsPage() {
   const [tagsData, setTagsData] = useState({
@@ -98,8 +98,8 @@ export default function AdminTagsPage() {
   return (
     <div className="w-full p-4 md:px-6 dark:text-white">
       <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Tags</h1>
-      <div className="w-full flex items-center justify-between mt-4 md:mt-6">
-        <form className="relative w-full max-w-md">
+      <div className="w-full md:flex items-center justify-between gap-1 mt-4 md:mt-6">
+        <form className="relative w-full max-w-md mb-1 md:mb-0">
           <input
             id="search_tags"
             name="search_tags"
@@ -107,43 +107,37 @@ export default function AdminTagsPage() {
             value={search}
             onChange={handleChange}
             placeholder="Search for tags..."
-            className="w-full px-4 py-2 text-sm outline-none rounded-lg md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white border sm:border border-arsenic/50"
+            className="w-full px-2 py-1 md:px-4 md:py-2 text-sm outline-none rounded-lg md:rounded-xl dark:bg-black dark:text-white shadow"
           />
           <button
             onClick={handleSubmit}
             aria-label="search button"
             type="submit"
-            className="absolute top-1 sm:top-0 right-0 py-2 pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
+            className="absolute top-1 sm:top-0 right-0 md:py-2 pr-1 md:pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
           >
             <span className="icon-[material-symbols--search]"></span>
           </button>
         </form>
         <Link
           to={"/admin/create_tag"}
-          className="w-28 py-1.5 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+          className="w-28 px-2 py-1 md:px-4 md:py-2 flex items-center justify-center text-sm font-medium bg-green-500 text-white border border-green-500 dark:border-0 rounded-lg hover:bg-white hover:text-green-500"
         >
           Create Tag
         </Link>
       </div>
       <div className="w-full p-2 md:p-3">
         {isLoading ? (
-          <div className="w-full h-56 md:h-72 flex items-center justify-center">
-            <ThreeCircles
-              visible={true}
-              height="100"
-              width="100"
-              color="#3b82f6"
-              ariaLabel="three-circles-loading"
-              wrapperStyle={{}}
-              wrapperClass=""
-            />
+          <div className="w-full flex items-center flex-wrap gap-1 md:gap-2 mb-4 md:mb-6">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <TagButtonSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <>
             {!tagsData.data.length && search ? (
-                <div className="w-full h-56 flex items-center justify-center">
-                  <p>There are currently no tags matching your search.</p>
-                </div>
+              <div className="w-full h-56 flex items-center justify-center">
+                <p>There are currently no tags matching your search.</p>
+              </div>
             ) : (
               <div className="w-full flex items-center flex-wrap gap-1 md:gap-2 mb-4 md:mb-6">
                 {tagsData.data.map((tag) => (
@@ -157,7 +151,7 @@ export default function AdminTagsPage() {
           {tagsData.page - 2 > 0 && (
             <button
               onClick={() => handlePage(-2)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {tagsData.page - 2}
             </button>
@@ -165,16 +159,18 @@ export default function AdminTagsPage() {
           {tagsData.page - 1 > 0 && (
             <button
               onClick={() => handlePage(-1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {tagsData.page - 1}
             </button>
           )}
-          <p className="font-bold">{tagsData.page}</p>
+          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">
+            {tagsData.page}
+          </p>
           {tagsData.page + 1 <= tagsData.totalPages && (
             <button
               onClick={() => handlePage(1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {tagsData.page + 1}
             </button>
@@ -182,7 +178,7 @@ export default function AdminTagsPage() {
           {tagsData.page + 2 <= tagsData.totalPages && (
             <button
               onClick={() => handlePage(1)}
-              className="flex items-center py-2 px-3 rounded font-medium bg-blue-50 dark:bg-black hover:bg-blue-200 dark:hover:text-black"
+              className="flex items-center py-2 px-3 rounded font-medium bg-white dark:bg-black hover:bg-blue-200 dark:hover:text-black"
             >
               {tagsData.page + 2}
             </button>
