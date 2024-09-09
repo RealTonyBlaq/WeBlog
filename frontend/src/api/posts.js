@@ -3,8 +3,8 @@ import { Axios } from "../lib/axios";
 import errorHandler from "../lib/errorHandler";
 import { baseURL } from "./auth";
 
-export const fetchPosts = async (page = 1) => {
-  const data = await fetch(`${baseURL}/api/v1/posts?page=${page}`);
+export const fetchPosts = async (page = 1, q="", by="title") => {
+  const data = await fetch(`${baseURL}/api/v1/posts?page=${page}&q=${q}&by=${by}`);
 
   return await data.json();
 };
