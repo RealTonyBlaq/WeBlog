@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ThreeCircles } from "react-loader-spinner";
 import { useOutsideClick } from "../../lib/useOutsideClick";
 import { fetchPosts } from "../../api/posts";
 import PostCard from "../../ui/post-card";
+import PostCardSkeleton from "../../ui/skeletons/post-card-skeleton";
 
 export default function AdminPostsPage() {
   const [postsData, setpostsData] = useState({
@@ -27,7 +27,7 @@ export default function AdminPostsPage() {
       const response = await fetchPosts(1, search, searchBy);
       if (response) {
         console.log(response);
-        
+
         setpostsData((prev) => ({
           ...prev,
           data: response.data,
@@ -93,9 +93,9 @@ export default function AdminPostsPage() {
     }
   }, [search]);
 
-  if (!postsData.data.length && !search)
+  if (!postsData.data.length && !search && !isLoading)
     return (
-      <div className="w-full h-full p-4 md:px-6 dark:text-white rounded-md shadow">
+      <div className="w-full h-full p-4 md:px-6 dark:text-white">
         <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Posts</h1>
         <div className="w-full h-56 flex items-center justify-center">
           <p>There are currently no articles.</p>
@@ -106,7 +106,7 @@ export default function AdminPostsPage() {
   return (
     <div className="w-full p-4 md:px-6 dark:text-white">
       <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Posts</h1>
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full flex items-center justify-between gap-1">
         <form className="relative w-full max-w-md">
           <input
             id="search_posts"
@@ -115,13 +115,13 @@ export default function AdminPostsPage() {
             value={search}
             onChange={handleChange}
             placeholder="Search for articles..."
-            className="w-full px-4 py-2 text-sm outline-none rounded-lg md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white shadow"
+            className="w-full px-2 py-1 md:px-4 md:py-2 text-sm outline-none rounded md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white shadow"
           />
           <button
             onClick={handleSubmit}
             aria-label="search button"
             type="submit"
-            className="absolute top-1 sm:top-0 right-0 py-2 pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
+            className="absolute top-1 sm:top-0 right-0 md:py-2 pr-1 md:pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
           >
             <span className="icon-[material-symbols--search]"></span>
           </button>
@@ -129,14 +129,14 @@ export default function AdminPostsPage() {
         <div className="relative flex items-center gap-2 md:gap-4">
           <p
             onClick={handleShowSearchByList}
-            className="w-40 bg-white dark:bg-dark-navy-blue px-4 py-2 shadow cursor-pointer font-semibold flex items-center justify-between rounded-xl capitalize"
+            className="w-20 md:w-40 text-sm bg-white dark:bg-dark-navy-blue px-2 py-1 md:px-4 md:py-2 shadow cursor-pointer font-semibold flex items-center justify-between rounded md:rounded-xl capitalize"
           >
             By {searchBy}
             <span className="icon-[fluent--arrow-bidirectional-up-down-12-filled]"></span>
           </p>
           <ul
             ref={ref}
-            className={`w-40 ${
+            className={`w-20 md:w-40 ${
               showSearchByList
                 ? "absolute -bottom-[96px] left-0 z-10"
                 : "hidden"
@@ -162,16 +162,10 @@ export default function AdminPostsPage() {
       </div>
       <div className="w-full p-2 md:p-3">
         {isLoading ? (
-          <div className="w-full h-56 md:h-72 flex items-center justify-center">
-            <ThreeCircles
-              visible={true}
-              height="100"
-              width="100"
-              color="#3b82f6"
-              ariaLabel="three-circles-loading"
-              wrapperStyle={{}}
-              wrapperClass=""
-            />
+          <div className="w-full flex items-center flex-wrap gap-2 md:gap-4 mb-4 md:mb-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <PostCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <>
