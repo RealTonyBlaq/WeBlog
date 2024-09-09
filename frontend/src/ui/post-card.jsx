@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Form, useNavigate } from "react-router-dom";
+import { Form, useLocation, useNavigate } from "react-router-dom";
 import { addToBookmark, deletePost as delPost, removeFromBookmark } from "../api/posts";
 import { useAuth } from "../lib/useAuth";
 import toast from "react-hot-toast";
@@ -21,6 +21,7 @@ export default function PostCard({
 }) {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
+  const {pathname} = useLocation()
 
   const handleBookmark = async (e) => {
     e.stopPropagation();
@@ -98,7 +99,7 @@ export default function PostCard({
           </div>
           {user ? (
             <div className="flex items-center gap-1 md:gap-2 text-lg">
-              {authorId && user.id === authorId && (
+              {authorId && user.id === authorId && pathname.startsWith('/dashboard') && (
                 <>
                   <Form action={`/dashboard/my_posts/${id}/edit`}>
                     <button
@@ -129,7 +130,7 @@ export default function PostCard({
                   </Form>
                 </>
               )}
-              {user && user.is_admin && (
+              {user && user.is_admin && pathname.startsWith('/admin') && (
                 <button
                   onClick={async(e) => {
                     e.stopPropagation();

@@ -20,6 +20,10 @@ def get_posts():
         page = request.args.get('page', type=int, default=1)
         # get limit number
         limit = request.args.get('limit', type=int, default=10)
+        # get query parameter
+        q = request.args.get('q', type=str, default='')
+        # get search by parameter
+        by = request.args.get('by', type=str, default='title')
 
         if page < 1 or limit < 1:
             return jsonify({'message': 'Page number\
@@ -28,7 +32,10 @@ def get_posts():
         # calculate start and end
         start = limit * (page - 1)
 
-        query = db.query(Post).filter(Post.is_published == True)
+        query = db.query(Post).filter(Post.is_published == True).order_by(Post.created_at.desc())
+        if q:
+            search = f'%{q}%'
+            query = query.filter(getattr(Post, by).like(search))
 
         futures = [
             executor.submit(query.slice, start, start + limit),
