@@ -28,6 +28,11 @@ import QueryPostsPage from "./routes/search/search";
 import MyDraftsPage from "./routes/my_drafts/my_drafts";
 import AdminDashboard from "./routes/admin/admin";
 import AdminTagsPage from "./routes/admin_tags/admin_tags";
+import CreateTagPage from "./routes/create_tag/create_tag";
+import TagPage from "./routes/tag/tag";
+import EditTagPage from "./routes/edit_tag/edit_tag";
+import AdminUsersPage from "./routes/admin_users/admin_users";
+import UserPage from "./routes/user/user";
 // loaders
 import { loader as HomeLoader } from "./routes/home/loader";
 import { loader as PostLoader } from "./routes/post/loader";
@@ -42,12 +47,7 @@ import { loader as editTagDataLoader } from "./routes/edit_tag/loader";
 import { loader as userDataLoader } from "./routes/user/loader"
 // actions
 import { action as DeletePost } from "./routes/delete_post/action";
-import CreateTagPage from "./routes/create_tag/create_tag";
-import TagPage from "./routes/tag/tag";
-import EditTagPage from "./routes/edit_tag/edit_tag";
-import AdminUsersPage from "./routes/admin_users/admin_users";
-import UserPage from "./routes/user/user";
-
+import AdminPostsPage from "./routes/admin_posts/admin_posts";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +119,10 @@ const router = createBrowserRouter([
             path: 'users/:id',
             element: <UserPage />,
             loader: userDataLoader
+          },
+          {
+            path: 'articles',
+            element: <AdminPostsPage />
           },
           {
             path: 'tags',
