@@ -39,3 +39,31 @@
 .post_card_markdown h1 {
   @apply md:text-lg xl:text-xl font-semibold
 }
+
+::-webkit-scrollbar {
+  @apply w-1 md:w-2
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #C23364;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #353D46;
+}
+
+.scrollBox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollBox::-webkit-scrollbar {
+  @apply w-0.5 md:w-1
+}
+
+.scrollBox::-webkit-scrollbar-thumb {
+  @apply rounded md:rounded-lg
+}
+
+.animate-pulse {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
