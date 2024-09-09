@@ -18,6 +18,7 @@ export default function AdminTagsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const response = await fetchTags(1, search);
       if (response) {
@@ -30,6 +31,7 @@ export default function AdminTagsPage() {
     } catch (e) {
       console.error(e);
     }
+    setLoading(false)
   };
 
   const handleClickTag = async (tag_id) => {

@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/useAuth";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
@@ -24,6 +24,7 @@ const links = [
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (!user) {
@@ -32,6 +33,8 @@ export default function AdminDashboard() {
     } else if (!user.is_admin) {
       toast.error("You are not authorized to access this page.");
       navigate("/");
+    } else if (pathname === '/admin/' || pathname === '/admin') {
+      navigate('/admin/users')
     }
   }, [user]);
 
