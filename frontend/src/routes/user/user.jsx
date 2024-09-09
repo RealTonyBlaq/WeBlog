@@ -68,17 +68,17 @@ export default function UserPage() {
     <div className="w-full h-full p-4 md:px-6 dark:text-white">
       <div
         onClick={() => navigate(-1)}
-        className="w-16 flex items-center gap-2 font-medium md:text-lg mb-1 md:mb-2 cursor-pointer dark:text-white hover:text-blue-500"
+        className="w-16 flex items-center gap-2 font-medium text-sm md:text-base mb-1 md:mb-2 cursor-pointer dark:text-white hover:text-blue-500"
       >
         <span className="icon-[ion--play-back] text-xl"></span> Back
       </div>
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full md:flex items-center justify-between">
         <div>
           <h1 className="font-semibold text-xl md:text-2xl xl:text-3xl">
             {`${user.first_name} ${user.last_name}`}
           </h1>
-          <p className="font-medium">Email: {user.email}</p>
-          <p className="font-medium">ID: {user.id}</p>
+          <p className="text-sm md:text-base font-medium">Email: {user.email}</p>
+          <p className="text-sm md:text-base font-medium">ID: {user.id}</p>
         </div>
         <div className="flex items-center gap-1 md:gap-2">
           {is_admin ? (
@@ -114,13 +114,13 @@ export default function UserPage() {
               value={search}
               onChange={handleChange}
               placeholder="Search for posts by title..."
-              className="w-full px-4 py-2 text-sm outline-none rounded-lg md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white shadow"
+              className="w-full px-2 py-1 md:px-4 md:py-2 text-sm outline-none rounded-lg md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white shadow"
             />
             <button
               onClick={handleSubmit}
               aria-label="search button"
               type="submit"
-              className="absolute top-1 sm:top-0 right-0 py-2 pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
+              className="absolute top-1 sm:top-0 right-0 md:py-2 pr-1 md:pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
             >
               <span className="icon-[material-symbols--search]"></span>
             </button>

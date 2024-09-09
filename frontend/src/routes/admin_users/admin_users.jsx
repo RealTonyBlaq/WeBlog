@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ThreeCircles } from "react-loader-spinner";
 import { fetchUsers } from "../../api/users";
 import UserCard from "../../ui/user-card";
 import { useOutsideClick } from "../../lib/useOutsideClick";
+import UserCardSkeleton from "../../ui/skeletons/user-card-skeleton";
 
 export default function AdminUsersPage() {
   const [usersData, setusersData] = useState({
@@ -23,6 +23,7 @@ export default function AdminUsersPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const response = await fetchUsers(1, search, searchBy);
       if (response) {
@@ -35,6 +36,7 @@ export default function AdminUsersPage() {
     } catch (e) {
       console.error(e);
     }
+    setLoading(false)
   };
 
   const handleShowSearchByList = () => setShowSearchByList(true);
@@ -74,12 +76,9 @@ export default function AdminUsersPage() {
     })();
   }, [usersData.page]);
 
-  console.log(usersData.data.length);
-  
-
-  if (!usersData.data.length && !search)
+  if (!usersData.data.length && !search && !isLoading)
     return (
-      <div className="w-full h-full p-4 md:px-6 dark:text-white rounded-md shadow">
+      <div className="w-full h-full md:py-4 md:px-6 dark:text-white rounded-md shadow">
         <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Users</h1>
         <div className="w-full h-56 flex items-center justify-center">
           <p>There are currently no users.</p>
@@ -88,9 +87,9 @@ export default function AdminUsersPage() {
     );
 
   return (
-    <div className="w-full p-4 md:px-6 dark:text-white">
+    <div className="w-full md:py-4 md:px-6 dark:text-white">
       <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Users</h1>
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full flex items-center justify-between gap-1">
         <form className="relative w-full max-w-md">
           <input
             id="search_users"
@@ -99,13 +98,13 @@ export default function AdminUsersPage() {
             value={search}
             onChange={handleChange}
             placeholder="Search for users..."
-            className="w-full px-4 py-2 text-sm outline-none rounded-lg md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white shadow"
+            className="w-full px-2 py-1 md:px-4 md:py-2 text-sm outline-none rounded md:rounded-xl dark:bg-dark-navy-blue/50 dark:text-white shadow"
           />
           <button
             onClick={handleSubmit}
             aria-label="search button"
             type="submit"
-            className="absolute top-1 sm:top-0 right-0 py-2 pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
+            className="absolute top-1 sm:top-0 right-0 md:py-2 pr-1 md:pr-4 text-lg text-arsenic hover:text-blue-500 dark:text-white"
           >
             <span className="icon-[material-symbols--search]"></span>
           </button>
@@ -113,16 +112,16 @@ export default function AdminUsersPage() {
         <div className="relative flex items-center gap-2 md:gap-4">
           <p
             onClick={handleShowSearchByList}
-            className="w-40 bg-white dark:bg-dark-navy-blue px-4 py-2 shadow cursor-pointer font-semibold flex items-center justify-between rounded-xl capitalize"
+            className="w-20 md:w-40 text-sm bg-white dark:bg-dark-navy-blue px-2 py-1 md:px-4 md:py-2 shadow cursor-pointer font-semibold flex items-center justify-between rounded md:rounded-xl capitalize"
           >
             By {searchBy}
             <span className="icon-[fluent--arrow-bidirectional-up-down-12-filled]"></span>
           </p>
           <ul
             ref={ref}
-            className={`w-40 ${
+            className={`w-20 md:w-40 ${
               showSearchByList ? "absolute -bottom-[128px] left-0 z-10" : "hidden"
-            } p-2 md:p-3 bg-slate-50 dark:bg-dark-navy-blue shadow rounded-lg`}
+            } p-2 md:p-3 bg-slate-50 dark:bg-dark-navy-blue shadow rounded md:rounded-lg`}
           >
             {searchByList.map((option) => (
               <li
@@ -142,19 +141,9 @@ export default function AdminUsersPage() {
           </ul>
         </div>
       </div>
-      <div className="w-full p-2 md:p-3">
+      <div className="w-full py-2 md:p-3">
         {isLoading ? (
-          <div className="w-full h-56 md:h-72 flex items-center justify-center">
-            <ThreeCircles
-              visible={true}
-              height="100"
-              width="100"
-              color="#3b82f6"
-              ariaLabel="three-circles-loading"
-              wrapperStyle={{}}
-              wrapperClass=""
-            />
-          </div>
+          Array.from({ length: 4}).map((_, i) => <UserCardSkeleton key={i} />)
         ) : (
           <>
             {!usersData.data.length && search ? (
@@ -163,15 +152,16 @@ export default function AdminUsersPage() {
               </div>
             ) : (
               <div className="w-full flex items-center flex-wrap gap-2 md:gap-4 mb-4 md:mb-6">
-                <div className="w-full uppercase grid grid-cols-[1fr_4fr_6fr_1fr_1.5fr] items-center gap-2 md:gap-3 bg-white dark:bg-dark-navy-blue p-2 md:p-4 rounded-md shadow">
-                  <div className="w-10 md:w-12"></div>
-                  <p className="font-semibold">Name</p>
+                <div className="w-full uppercase grid md:grid-cols-[1fr_4fr_6fr_1fr_1.5fr] items-center gap-2 md:gap-3 bg-white dark:bg-dark-navy-blue px-3 py-2 md:px-4 md:py-3 rounded-md shadow">
+                  <div className="hidden md:block w-10 md:w-12"></div>
+                  <p className="hidden md:block font-semibold">Name</p>
                   <p className="font-semibold">Email</p>
-                  <p className="font-semibold">Admin</p>
-                  <p className="font-semibold">Verified</p>
+                  <p className="hidden md:block font-semibold">Admin</p>
+                  <p className="hidden md:block font-semibold">Verified</p>
                 </div>
                 {usersData.data.map((user) => (
                   <UserCard key={user.id} user={user} />
+                  // <UserCardSkeleton key={user.id} />
                 ))}
               </div>
             )}
