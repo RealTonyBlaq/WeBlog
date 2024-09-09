@@ -79,7 +79,7 @@ export default function AdminTagsPage() {
 
   if (!tagsData.data.length)
     return (
-      <div className="w-full h-full p-4 md:px-6 bg-white dark:bg-dark-navy-blue dark:text-white rounded-md shadow">
+      <div className="w-full h-full p-4 md:px-6  dark:text-white">
         <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Tags</h1>
         <div className="w-full h-56 flex items-center justify-center">
           <p>
@@ -96,7 +96,7 @@ export default function AdminTagsPage() {
     );
 
   return (
-    <div className="w-full p-4 md:px-6 bg-white dark:bg-dark-navy-blue dark:text-white rounded-md shadow">
+    <div className="w-full p-4 md:px-6 dark:text-white">
       <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Tags</h1>
       <div className="w-full flex items-center justify-between mt-4 md:mt-6">
         <form className="relative w-full max-w-md">
