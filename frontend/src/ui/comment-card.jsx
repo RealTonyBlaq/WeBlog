@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../lib/useAuth";
 import Avatar from "./avatar";
 import CommentCardSkeleton from "./skeletons/comment-card-skeleton";
@@ -28,9 +28,12 @@ export default function CommentCard({ comment, setParent }) {
     totalPages: Math.ceil(comment.replies / 2),
   });
   const [repliesLoading, setLoading] = useState(false);
-  const [showReplies, setShow] = useState(false);
+  const [showReplies, setShow] = useState(true);
 
   const [replyComment, setReplyComment] = useState(false);
+
+  // variable to track the initial fetching of a comment's replies
+  const initialFetch = useRef(false);
 
   const datePublished = new Date(comment.created_at);
   const dateUpdated = new Date(comment.updated_at);
@@ -55,6 +58,8 @@ export default function CommentCard({ comment, setParent }) {
       setReplies((prev) => ({
         ...prev,
         data: [...prev.data, ...response.data.comments],
+        page: Number(response.data.page),
+        totalPages: Number(response.data.total_pages),
       }));
     }
     setLoading(false);
@@ -91,23 +96,21 @@ export default function CommentCard({ comment, setParent }) {
     }
   };
 
-  const handleLoadMoreReplies = () => {
+  const handleLoadMoreReplies = async () => {
     if (replies.page < replies.totalPages) {
-      setReplies((prev) => ({ ...prev, page: prev.page + 1 }));
+      // setReplies((prev) => ({ ...prev, page: prev.page + 1 }));
+      await handleFetchCommentReplies(comment.id, replies.page + 1);
     }
   };
 
   useEffect(() => {
-    if (
-      showReplies &&
-      replies.length > replies.data.length &&
-      replies.data.length < replies.page * 2
-    ) {
+    if (!initialFetch.current) {
       (async () => {
-        await handleFetchCommentReplies(comment.id, replies.page);
+        await handleFetchCommentReplies(comment.id, 1);
       })();
     }
-  }, [showReplies, replies.page]);
+    initialFetch.current = true;
+  }, []);
 
   return (
     <div className="w-full">
