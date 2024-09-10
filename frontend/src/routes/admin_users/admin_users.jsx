@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchUsers } from "../../api/users";
 import UserCard from "../../ui/user-card";
 import { useOutsideClick } from "../../lib/useOutsideClick";
 import UserCardSkeleton from "../../ui/skeletons/user-card-skeleton";
+import { useLoaderData } from "react-router-dom";
 
 export default function AdminUsersPage() {
+  const { data: { users, page, total_pages} } = useLoaderData();
   const [usersData, setusersData] = useState({
-    data: [],
-    page: 1,
-    totalPages: 1,
+    data: users,
+    page: Number(page),
+    totalPages: Number(total_pages),
   });
   const [search, setSearch] = useState("");
   const [searchBy, setSearchBy] = useState("id");
@@ -44,41 +46,49 @@ export default function AdminUsersPage() {
 
   const ref = useOutsideClick(handleHideSearchByList);
 
-  const handlePage = (number) => {
+  const handlePage = async (number) => {
     if (number < 0) {
       if (usersData.page + number >= 1) {
-        setusersData((prev) => ({ ...prev, page: prev.page + number }));
+        setLoading(true);
+        try {
+          const response = await fetchUsers(usersData.page + number, search);
+          if (response) {
+            setusersData((prev) => ({
+              ...prev,
+              data: response.data.users,
+              page: Number(response.data.page),
+              totalPages: Number(response.data.total_pages),
+            }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        setLoading(false);
       }
     } else {
       if (usersData.page < usersData.totalPages) {
-        setusersData((prev) => ({ ...prev, page: prev.page + number }));
+        setLoading(true);
+        try {
+          const response = await fetchUsers(usersData.page + number, search);
+          if (response) {
+            setusersData((prev) => ({
+              ...prev,
+              data: response.data.users,
+              page: Number(response.data.page),
+              totalPages: Number(response.data.total_pages),
+            }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        setLoading(false);
       }
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const response = await fetchUsers(usersData.page, search);
-        if (response) {
-          setusersData((prev) => ({
-            ...prev,
-            data: response.data.users,
-            page: Number(response.data.page),
-            totalPages: Number(response.data.total_pages),
-          }));
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    })();
-  }, [usersData.page]);
-
   if (!usersData.data.length && !search && !isLoading)
     return (
-      <div className="w-full h-full md:py-4 md:px-6 dark:text-white rounded-md shadow">
+      <div className="w-full h-full md:py-4 md:px-6 dark:text-white">
         <h1 className="font-medium text-xl md:text-2xl xl:text-3xl">Users</h1>
         <div className="w-full h-56 flex items-center justify-center">
           <p>There are currently no users.</p>
@@ -190,7 +200,9 @@ export default function AdminUsersPage() {
               {usersData.page - 1}
             </button>
           )}
-          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">{usersData.page}</p>
+          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">
+            {usersData.page}
+          </p>
           {usersData.page + 1 <= usersData.totalPages && (
             <button
               onClick={() => handlePage(1)}
