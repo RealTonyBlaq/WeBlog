@@ -4,7 +4,7 @@ import { redirect, useLoaderData } from "react-router-dom";
 import { MyTextArea } from "../../ui/form-input";
 import { commentSchema } from "../../lib/utils";
 import { Form, Formik } from "formik";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   addToBookmark,
   addToLikedArticles,
@@ -113,7 +113,19 @@ const RenderPostMarkDown = () => {
 
   const handleLoadMoreComments = async () => {
     setLoading(true);
-    setComment((prev) => ({ ...prev, page: prev.page + 1 }));
+    const response = await fetchPostComments(
+      post.id,
+      comments.order,
+      comments.page + 1
+    );
+    if (response) {
+      setComment((prev) => ({
+        ...prev,
+        data: [...prev.data, ...response.data.comments],
+        page: Number(response.data.page),
+      }));
+    }
+    setLoading(false);
   };
 
   const handleShowCommentsOrderList = () => setShowCommentsOrderList(true);
@@ -135,25 +147,6 @@ const RenderPostMarkDown = () => {
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (comments.page > 1) {
-      (async () => {
-        const response = await fetchPostComments(
-          post.id,
-          comments.order,
-          comments.page
-        );
-        if (response) {
-          setComment((prev) => ({
-            ...prev,
-            data: [...prev.data, ...response.data.comments],
-          }));
-          setLoading(false);
-        }
-      })();
-    }
-  }, [comments.page]);
 
   const ref = useOutsideClick(handleHideCommentsOrderList);
 
@@ -223,7 +216,9 @@ const RenderPostMarkDown = () => {
           </div>
         </div>
         <div className="w-full mb-4 md:mb-8">
-          <h2 className="font-semibold text-lg md:text-xl capitalize">About the author</h2>
+          <h2 className="font-semibold text-lg md:text-xl capitalize">
+            About the author
+          </h2>
           <p className="">{author.bio}</p>
         </div>
         <div className="w-full">

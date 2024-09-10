@@ -1,7 +1,7 @@
 import { useLoaderData, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { deleteUser, fetchUserPosts, makeUserAdmin } from "../../api/users";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { AdminDisplayPosts } from "../../ui/admin-display-posts";
 
 export default function UserPage() {
@@ -11,10 +11,25 @@ export default function UserPage() {
   const [is_admin, setIsAdmin] = useState(user.is_admin);
   const [search, setSearch] = useState("");
 
-  const handleChange = (e) => setSearch(e.target.value);
+  // set a variable to track when the user has triggered a search
+  const hasSearched = useRef(false)
+
+  const handleChange = async (e) => {
+    setSearch(e.target.value);
+    // if search is true but the input element is empty,
+    // trigger a fetch if the user had made a search
+    if (search && e.target.value === '' && hasSearched.current) {
+      hasSearched.current = false
+      const response = await fetchUserPosts(user.id);
+      if (response) {
+        setPosts(response.data);
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    hasSearched.current = true
     try {
       const response = await fetchUserPosts(user.id, 1, search);
       if (response) {
@@ -53,17 +68,6 @@ export default function UserPage() {
     }
   };
 
-  useEffect(() => {
-    if (!search) {
-      (async () => {
-        const response = await fetchUserPosts(user.id);
-        if (response) {
-          setPosts(response.data);
-        }
-      })();
-    }
-  }, [search]);
-
   return (
     <div className="w-full h-full p-4 md:px-6 dark:text-white">
       <div
@@ -77,7 +81,9 @@ export default function UserPage() {
           <h1 className="font-semibold text-xl md:text-2xl xl:text-3xl">
             {`${user.first_name} ${user.last_name}`}
           </h1>
-          <p className="text-sm md:text-base font-medium">Email: {user.email}</p>
+          <p className="text-sm md:text-base font-medium">
+            Email: {user.email}
+          </p>
           <p className="text-sm md:text-base font-medium">ID: {user.id}</p>
         </div>
         <div className="flex items-center gap-1 md:gap-2">
