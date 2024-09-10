@@ -5,6 +5,7 @@ from flask import Flask, g, jsonify, render_template
 from flask.sessions import SecureCookieSessionInterface
 from flask_login import LoginManager, user_loaded_from_request
 from flask_cors import CORS
+from flask_wtf.csrf import CSRFProtect
 from flask_executor import Executor
 from models.user import User
 from os import getenv
@@ -45,6 +46,8 @@ executor = Executor(app=app)
 cors = CORS(app,
             resources={r"/api/v1/*": {"origins": "*"}},
             supports_credentials=True)
+
+csrf = CSRFProtect(app=app)
 
 
 # disable setting of Flask's Session cookie
