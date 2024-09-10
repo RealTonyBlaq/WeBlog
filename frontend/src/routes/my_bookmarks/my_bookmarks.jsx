@@ -19,7 +19,7 @@ export default function MyBookmarksPage() {
           {posts.data.length ? (
             <DisplayPosts posts={posts} fetchData={fetchMyBookmarks} />
           ) : (
-            <div className="w-full h-40 font-medium flex flex-col items-center justify-center gap-2 md:gap-4">
+            <div className="w-full h-40 font-medium dark:text-white flex flex-col items-center justify-center gap-2 md:gap-4">
               <p className="">
                 You do not have any bookmarked articles at the moment
               </p>

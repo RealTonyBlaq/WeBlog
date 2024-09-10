@@ -105,8 +105,8 @@ export default function MyProfilePage() {
                 }}
                 type="button"
                 disabled={isLoading}
-                className={`w-32 py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg ${
-                  !isLoading && "hover:bg-white hover:text-blue-500"
+                className={`w-32 py-2 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg ${
+                  !isLoading && "hover:bg-white hover:text-blue-700"
                 }`}
               >
                 {isLoading ? (
@@ -157,14 +157,14 @@ export default function MyProfilePage() {
           <div className="w-full mt-4 md:mt-6 xl:mt-8 flex items-center justify-end gap-1 md:gap-2">
             <Link
               to={"change_password"}
-              className={`w-16 md:w-48 py-1 flex items-center justify-center gap-2 font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500`}
+              className={`w-16 md:w-48 py-1 flex items-center justify-center gap-2 font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg hover:bg-white hover:text-blue-700`}
             >
               <span className="icon-[mdi--password-outline]"></span>
               <span className="hidden md:block">Change Password</span>
             </Link>
             <Link
               to={"edit_profile"}
-              className={`w-16 md:w-32 py-1 flex items-center justify-center gap-2 font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500`}
+              className={`w-16 md:w-32 py-1 flex items-center justify-center gap-2 font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg hover:bg-white hover:text-blue-700`}
             >
               <span className="icon-[lucide--edit] block"></span>
               <span className="hidden md:block">Edit Profile</span>

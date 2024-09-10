@@ -1,6 +1,10 @@
 /* eslint-disable react/prop-types */
 import { Form, useLocation, useNavigate } from "react-router-dom";
-import { addToBookmark, deletePost as delPost, removeFromBookmark } from "../api/posts";
+import {
+  addToBookmark,
+  deletePost as delPost,
+  removeFromBookmark,
+} from "../api/posts";
 import { useAuth } from "../lib/useAuth";
 import toast from "react-hot-toast";
 import DOMPurify from "dompurify";
@@ -17,11 +21,11 @@ export default function PostCard({
   tags,
   author_avatar,
   is_published,
-  deletePost
+  deletePost,
 }) {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
-  const {pathname} = useLocation()
+  const { pathname } = useLocation();
 
   const handleBookmark = async (e) => {
     e.stopPropagation();
@@ -99,65 +103,90 @@ export default function PostCard({
           </div>
           {user ? (
             <div className="flex items-center gap-1 md:gap-2 text-lg">
-              {authorId && user.id === authorId && pathname.startsWith('/dashboard') && (
-                <>
-                  <Form action={`/dashboard/my_posts/${id}/edit`}>
-                    <button
-                      type="submit"
-                      className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
+              {authorId &&
+                user.id === authorId &&
+                pathname.startsWith("/dashboard") && (
+                  <>
+                    <Form action={`/dashboard/my_posts/${id}/edit`}>
+                      <button
+                        aria-label="edit post"
+                        type="submit"
+                        className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
+                      >
+                        <span
+                          aria-hidden
+                          className="icon-[lucide--edit] block"
+                        ></span>
+                      </button>
+                    </Form>
+                    <Form
+                      action={`/dashboard/my_posts/${id}/delete`}
+                      method="post"
                     >
-                      <span className="icon-[lucide--edit] block"></span>
-                    </button>
-                  </Form>
-                  <Form
-                    action={`/dashboard/my_posts/${id}/delete`}
-                    method="post"
-                  >
-                    <button
-                      type="submit"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (
-                          !confirm("Are you sure you want to delete this post?")
-                        ) {
-                          e.preventDefault();
-                        }
-                      }}
-                      className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
-                    >
-                      <span className="icon-[ic--outline-delete] block"></span>
-                    </button>
-                  </Form>
-                </>
-              )}
-              {user && user.is_admin && pathname.startsWith('/admin') && (
+                      <button
+                        aria-label="delete post"
+                        type="submit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (
+                            !confirm(
+                              "Are you sure you want to delete this post?"
+                            )
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
+                      >
+                        <span
+                          aria-hidden
+                          className="icon-[ic--outline-delete] block"
+                        ></span>
+                      </button>
+                    </Form>
+                  </>
+                )}
+              {user && user.is_admin && pathname.startsWith("/admin") && (
                 <button
-                  onClick={async(e) => {
+                  aria-label="delete this post"
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    if (
-                      confirm("Are you sure you want to delete this post?")
-                    ) {
-                      const response = await delPost(id)
+                    if (confirm("Are you sure you want to delete this post?")) {
+                      const response = await delPost(id);
                       if (response) {
-                        toast.success(response.data.message)
-                        deletePost(id)
+                        toast.success(response.data.message);
+                        deletePost(id);
                       }
                     }
                   }}
                   className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
                 >
-                  <span className="icon-[ic--outline-delete] block"></span>
+                  <span
+                    aria-hidden
+                    className="icon-[ic--outline-delete] block"
+                  ></span>
                 </button>
               )}
               {is_published && !user.is_admin && (
                 <button
+                  aria-label={`${
+                    user && user.bookmarks.includes(id)
+                      ? "remove from"
+                      : "add to"
+                  } bookmarks`}
                   onClick={handleBookmark}
                   className="hover:bg-blue-500 p-1 rounded-full hover:text-slate-100"
                 >
                   {user.bookmarks.includes(id) ? (
-                    <span className="icon-[material-symbols--bookmark] block"></span>
+                    <span
+                      aria-hidden
+                      className="icon-[material-symbols--bookmark] block"
+                    ></span>
                   ) : (
-                    <span className="icon-[material-symbols--bookmark-outline] block"></span>
+                    <span
+                      aria-hidden
+                      className="icon-[material-symbols--bookmark-outline] block"
+                    ></span>
                   )}
                 </button>
               )}

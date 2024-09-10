@@ -25,7 +25,7 @@ export default function MyDraftsPage() {
                 </p>
                 <Link
                   to={"/dashboard/create_post"}
-                  className="px-4 py-2 bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg"
+                  className="px-4 py-2 bg-blue-700 hover:bg-white text-white hover:text-blue-700 border border-blue-700 dark:border-0 rounded-lg"
                 >
                   Write your first article now
                 </Link>

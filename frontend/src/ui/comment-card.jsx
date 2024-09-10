@@ -141,30 +141,34 @@ export default function CommentCard({ comment, setParent }) {
           <div className="flex items-center gap-2 md:gap-4">
             <div className="flex items-center gap-1 md:gap-2">
               <button
+              aria-label={`${user && user.liked_comments.includes(comment.id) ? 'Unlike' : 'Like'} comment`}
                 onClick={handleLikeComment}
                 className="flex items-center justify-center"
               >
                 {user && user.liked_comments.includes(comment.id) ? (
-                  <span className="icon-[mdi--heart] text-red-500"></span>
+                  <span aria-hidden className="icon-[mdi--heart] text-red-500"></span>
                 ) : (
-                  <span className="icon-[material-symbols--heart-plus-outline]"></span>
+                  <span aria-hidden className="icon-[material-symbols--heart-plus-outline]"></span>
                 )}
               </button>
               <p className="text-sm">{commentLikes}</p>
             </div>
             <button
+            aria-label="reply comment"
               onClick={() => setReplyComment((prev) => !prev)}
               className="flex items-center justify-center"
             >
-              <span className="icon-[mdi--message-reply]"></span>
+              <span aria-hidden className="icon-[mdi--message-reply]"></span>
             </button>
             {replies.length ? (
-              <div className="flex items-center gap-2 text-blue-500 font-semibold">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-100 font-semibold">
                 <button
+                aria-label={`${showReplies ? 'hide': 'show'} replies`}
                   onClick={handleShowReplies}
                   className="flex items-center justify-center"
                 >
                   <span
+                  aria-hidden
                     className={`icon-[bxs--down-arrow] ${
                       showReplies ? "rotate-180" : ""
                     } ease-linear duration-200`}
@@ -201,6 +205,7 @@ export default function CommentCard({ comment, setParent }) {
               >
                 <MyTextArea
                   label=""
+                  id="content"
                   name="content"
                   type="text"
                   placeholder="Comment here......"
@@ -209,7 +214,7 @@ export default function CommentCard({ comment, setParent }) {
                 <div className="w-full flex justify-end">
                   <button
                     type="submit"
-                    className="w-16 py-1 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+                    className="w-16 py-1 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg hover:bg-white hover:text-blue-700"
                   >
                     Reply
                   </button>
@@ -240,7 +245,7 @@ export default function CommentCard({ comment, setParent }) {
                 <button
                   type="button"
                   onClick={handleLoadMoreReplies}
-                  className="w-full py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+                  className="w-full py-2 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg hover:bg-white hover:text-blue-700"
                 >
                   Load More Replies
                 </button>

@@ -7,17 +7,17 @@ const links = [
   {
     url: "/my_posts",
     name: "My Posts",
-    icon: <span className="icon-[ooui--articles-rtl]"></span>
+    icon: <span aria-hidden className="icon-[ooui--articles-rtl]"></span>
   },
   {
     url: "/my_drafts",
     name: "My Drafts",
-    icon: <span className="icon-[fluent--drafts-20-filled]"></span>
+    icon: <span aria-hidden className="icon-[fluent--drafts-20-filled]"></span>
   },
   {
     url: "/my_bookmarks",
     name: "My Bookmarks",
-    icon: <span className="icon-[ion--bookmarks-sharp]"></span>
+    icon: <span aria-hidden className="icon-[ion--bookmarks-sharp]"></span>
   },
   // {
   //   url: "/my_tags",
@@ -58,7 +58,7 @@ export default function DashBoard() {
           ))}
         </ul>
       </nav>
-      <div className="w-full h-full overflow-y-scroll px-6 py-4 md:p-0">
+      <div className="w-full h-full overflow-y-auto px-6 py-4 md:p-0">
         <Outlet />
       </div>
     </div>

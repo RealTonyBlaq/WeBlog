@@ -202,7 +202,7 @@ export default function EditPost({ post, tags }) {
             <div className="w-full flex flex-col items-center justify-center gap-4">
               <div className="w-full h-full mb-1 md:mb-2">
                 <label
-                  className="w-48 h-full px-2 py-1 flex items-center justify-center cursor-pointer rounded-md font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 hover:bg-white hover:text-blue-500"
+                  className="w-48 h-full px-2 py-1 flex items-center justify-center cursor-pointer rounded-md font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 hover:bg-white hover:text-blue-700"
                   htmlFor="header_url"
                 >
                   {header_url ? "Change" : "Upload"} Header Image
@@ -242,7 +242,7 @@ export default function EditPost({ post, tags }) {
                     }
                   }}
                   type="button"
-                  className="w-36 px-2 py-1 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+                  className="w-36 px-2 py-1 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg hover:bg-white hover:text-blue-700"
                 >
                   Upload Image
                 </button>
@@ -295,6 +295,7 @@ export default function EditPost({ post, tags }) {
                       ))}
                     </div>
                     <MyTextAndCheckInput
+                      id="tag_ids"
                       name="tag_ids"
                       label={"Add Tags"}
                       data={tags}
@@ -303,7 +304,7 @@ export default function EditPost({ post, tags }) {
                     <div className="w-full flex gap-4">
                       <button
                         type="submit"
-                        className="w-24 py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg hover:bg-white hover:text-blue-500"
+                        className="w-24 py-2 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg hover:bg-white hover:text-blue-700"
                       >
                         {post && post.is_published ? "Update" : "Publish"}
                       </button>

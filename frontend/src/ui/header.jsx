@@ -62,10 +62,14 @@ export default function Header() {
         <div className="w-full flex gap-4 items-center">
           {/* WeBlog Logo */}
           <button
+            aria-label="open menu"
             onClick={handleToggleMenu}
             className="flex items-center justify-center lg:hidden text-3xl"
           >
-            <span className="icon-[ci--hamburger-md]"></span>
+            <span
+              aria-hidden
+              className="icon-[ci--hamburger-md]"
+            ></span>
           </button>
           <Link to={"/"} className="text-2xl md:text-3xl font-bold">
             WeBlog
@@ -81,10 +85,14 @@ export default function Header() {
         } lg:hidden px-6 py-4 dark:text-white dark:bg-dark-navy-blue text-arsenic bg-white transition duration-300 ease-linear`}
       >
         <button
+          aria-label="close menu"
           onClick={handleToggleMenu}
           className="absolute top-0 right-0 p-4 flex items-center justify-center lg:hidden text-3xl"
         >
-          <span className="icon-[material-symbols--close]"></span>
+          <span
+            aria-hidden
+            className="icon-[material-symbols--close]"
+          ></span>
         </button>
         {/* WeBlog Menu */}
         <div className="w-full px-4 py-12" onClick={handleToggleMenu}>
@@ -102,14 +110,20 @@ export default function Header() {
                   to={"/dashboard"}
                   className="flex items-center gap-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
                 >
-                  <span className="icon-[material-symbols--dashboard]"></span>
+                  <span
+                    aria-hidden
+                    className="icon-[material-symbols--dashboard]"
+                  ></span>
                   Dashboard
                 </Link>
                 <Link
                   to={"/dashboard/create_post"}
                   className="flex items-center gap-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
                 >
-                  <span className="icon-[material-symbols--post-add]"></span>
+                  <span
+                    aria-hidden
+                    className="icon-[material-symbols--post-add]"
+                  ></span>
                   Create Post
                 </Link>
                 <button
@@ -140,7 +154,11 @@ export default function Header() {
                   to={"/login"}
                   className="flex items-center gap-1 mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
                 >
-                  <span className="icon-[material-symbols--login]"></span>Login
+                  <span
+                    aria-hidden
+                    className="icon-[material-symbols--login]"
+                  ></span>
+                  Login
                 </Link>
               </>
             )}
@@ -156,7 +174,12 @@ export default function Header() {
             >
               Create Post
             </Link>
-            <div onClick={openUserMenu} className="">
+            <div
+              role="button"
+              aria-label="open user menu"
+              onClick={openUserMenu}
+              className=""
+            >
               {user.avatar_url ? (
                 <img
                   src={user.avatar_url}
@@ -173,7 +196,7 @@ export default function Header() {
                 <div
                   onClick={closeUserMenu}
                   ref={ref}
-                  className="min-w-60 z-50 grid gap-2 absolute top-[80px] md:top-[88px] right-4 p-4 bg-white dark:bg-dark-navy-blue/75 rounded-xl shadow-lg"
+                  className="min-w-60 z-50 grid gap-2 absolute top-[80px] md:top-[88px] right-4 p-4 bg-white dark:bg-eerie-black rounded-xl shadow-lg"
                 >
                   <div className="w-full">
                     <p className="font-medium">
@@ -187,18 +210,31 @@ export default function Header() {
                       to={"/dashboard"}
                       className="flex items-center gap-1 p-1"
                     >
-                      <span className="icon-[material-symbols--dashboard]"></span>
+                      <span
+                        aria-hidden
+                        className="icon-[material-symbols--dashboard]"
+                      ></span>
                       Dashboard
                     </Link>
                     <Link
                       to={"/dashboard/create_post"}
                       className="flex items-center gap-1 p-1"
                     >
-                      <span className="icon-[material-symbols--post-add]"></span>
+                      <span
+                        aria-hidden
+                        className="icon-[material-symbols--post-add]"
+                      ></span>
                       Create Post
                     </Link>
-                    <Link to={"/dashboard/my_bookmarks"} className="flex items-center gap-1 p-1">
-                    <span className="icon-[material-symbols--bookmarks]"></span>Bookmarks
+                    <Link
+                      to={"/dashboard/my_bookmarks"}
+                      className="flex items-center gap-1 p-1"
+                    >
+                      <span
+                        aria-hidden
+                        className="icon-[material-symbols--bookmarks]"
+                      ></span>
+                      Bookmarks
                     </Link>
                   </div>
                   <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
@@ -214,8 +250,11 @@ export default function Header() {
                     }}
                     className="flex items-center gap-1 p-1 font-medium"
                   >
-                    <span className="icon-[material-symbols--logout]"></span>Log
-                    Out
+                    <span
+                      aria-hidden
+                      className="icon-[material-symbols--logout]"
+                    ></span>
+                    Log Out
                   </button>
                 </div>
               ) : null}
@@ -238,13 +277,14 @@ export default function Header() {
           </>
         )}
         <button
+          aria-label="toggle dark theme"
           onClick={handleToggleTheme}
           className="flex text-arsenic dark:text-white items-center justify-center text-xl md:text-2xl"
         >
           {darkTheme ? (
-            <span className="icon-[bxs--sun]"></span>
+            <span aria-hidden className="icon-[bxs--sun]"></span>
           ) : (
-            <span className="icon-[solar--moon-bold]"></span>
+            <span aria-hidden className="icon-[solar--moon-bold]"></span>
           )}
         </button>
       </div>

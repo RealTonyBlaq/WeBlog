@@ -188,13 +188,14 @@ const RenderPostMarkDown = () => {
         <div className="w-full flex items-center justify-between text-xl md:text-2xl my-4 md:my-8">
           <div className="flex items-center gap-1 md:gap-2">
             <button
+            aria-label={`${user && user.liked_articles.includes(post.id) ? 'unlike': 'like'} article`}
               onClick={handleLikeArticle}
               className="flex items-center justify-center"
             >
               {user && user.liked_articles.includes(post.id) ? (
-                <span className="icon-[mdi--heart] text-red-500"></span>
+                <span aria-hidden className="icon-[mdi--heart] text-red-500"></span>
               ) : (
-                <span className="icon-[material-symbols--heart-plus-outline]"></span>
+                <span aria-hidden className="icon-[material-symbols--heart-plus-outline]"></span>
               )}
             </button>
             <p className="text-sm">{pageLikes}</p>
@@ -204,13 +205,14 @@ const RenderPostMarkDown = () => {
               <span className="icon-[ion--share-outline]"></span>
             </button> */}
             <button
+            aria-label={`${user && user.bookmarks.includes(post.id) ? 'remove from': 'add to'} bookmarks`}
               onClick={handleBookmark}
               className="flex items-center justify-center"
             >
               {user && user.bookmarks.includes(post.id) ? (
-                <span className="icon-[material-symbols--bookmark]"></span>
+                <span aria-hidden className="icon-[material-symbols--bookmark]"></span>
               ) : (
-                <span className="icon-[material-symbols--bookmark-outline]"></span>
+                <span aria-hidden className="icon-[material-symbols--bookmark-outline]"></span>
               )}
             </button>
           </div>
@@ -247,8 +249,8 @@ const RenderPostMarkDown = () => {
                   <div className="w-full flex justify-end">
                     <button
                       type="submit"
-                      className={`w-24 py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg ${
-                        !isLoading && "hover:bg-white hover:text-blue-500"
+                      className={`w-24 py-2 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg ${
+                        !isLoading && "hover:bg-white hover:text-blue-700"
                       }`}
                     >
                       Comment
@@ -260,13 +262,14 @@ const RenderPostMarkDown = () => {
           </Formik>
           <div className="w-full">
             <div className="h-32 flex items-center gap-2 md:gap-4 px-4">
-              <p
+              <div
+              role="button"
                 onClick={handleShowCommentsOrderList}
                 className="w-32 px-4 py-2 mb-1 md:mb-2 border border-arsenic cursor-pointer font-semibold flex items-center justify-between rounded-xl capitalize"
               >
                 {comments.order}
-                <span className="icon-[fluent--arrow-bidirectional-up-down-12-filled]"></span>
-              </p>
+                <span aria-hidden className="icon-[fluent--arrow-bidirectional-up-down-12-filled]"></span>
+              </div>
               <ul
                 ref={ref}
                 className={`w-32 ${
@@ -285,7 +288,7 @@ const RenderPostMarkDown = () => {
                   >
                     {order}{" "}
                     {order === comments.order ? (
-                      <span className="icon-[charm--tick-double]"></span>
+                      <span aria-hidden className="icon-[charm--tick-double]"></span>
                     ) : null}
                   </li>
                 ))}
@@ -317,8 +320,8 @@ const RenderPostMarkDown = () => {
                   type="button"
                   onClick={handleLoadMoreComments}
                   disabled={isLoading}
-                  className={`w-full py-2 flex items-center justify-center font-medium bg-blue-500 text-white border border-blue-500 dark:border-0 rounded-lg ${
-                    !isLoading && "hover:bg-white hover:text-blue-500"
+                  className={`w-full py-2 flex items-center justify-center font-medium bg-blue-700 text-white border border-blue-700 dark:border-0 rounded-lg ${
+                    !isLoading && "hover:bg-white hover:text-blue-700"
                   }`}
                 >
                   Load More Comments
