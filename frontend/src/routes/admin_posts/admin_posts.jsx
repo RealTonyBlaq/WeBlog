@@ -1,23 +1,43 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { useOutsideClick } from "../../lib/useOutsideClick";
 import { fetchPosts } from "../../api/posts";
 import PostCard from "../../ui/post-card";
 import PostCardSkeleton from "../../ui/skeletons/post-card-skeleton";
+import { useLoaderData } from "react-router-dom";
 
 export default function AdminPostsPage() {
+  const { data, page, total_pages } = useLoaderData()
   const [postsData, setpostsData] = useState({
-    data: [],
-    page: 1,
-    totalPages: 1,
+    data: data,
+    page: Number(page),
+    totalPages: Number(total_pages),
   });
   const [search, setSearch] = useState("");
   const [searchBy, setSearchBy] = useState("title");
   const [isLoading, setLoading] = useState(false);
   const [showSearchByList, setShowSearchByList] = useState(false);
 
+  const hasSearched = useRef(false);
+
   const searchByList = ["id", "title"];
 
-  const handleChange = (e) => setSearch(e.target.value);
+  const handleChange = async (e) => {
+    setSearch(e.target.value);
+    // if search is true but the input element is empty,
+    // trigger a fetch if the user had made a search
+    if (search && e.target.value === "" && hasSearched.current) {
+      hasSearched.current = false
+      const response = await fetchPosts();
+      if (response) {
+        setpostsData((prev) => ({
+          ...prev,
+          data: response.data,
+          page: Number(response.page),
+          totalPages: Number(response.total_pages),
+        }));
+      }
+    }
+  };
 
   const handleSearchByChange = (value) => setSearchBy(value);
 
@@ -26,8 +46,7 @@ export default function AdminPostsPage() {
     try {
       const response = await fetchPosts(1, search, searchBy);
       if (response) {
-        console.log(response);
-
+        hasSearched.current = true
         setpostsData((prev) => ({
           ...prev,
           data: response.data,
@@ -45,53 +64,45 @@ export default function AdminPostsPage() {
 
   const ref = useOutsideClick(handleHideSearchByList);
 
-  const handlePage = (number) => {
+  const handlePage = async (number) => {
     if (number < 0) {
       if (postsData.page + number >= 1) {
-        setpostsData((prev) => ({ ...prev, page: prev.page + number }));
+        setLoading(true);
+        try {
+          const response = await fetchPosts(postsData.page + number, search);
+          if (response) {
+            setpostsData((prev) => ({
+              ...prev,
+              data: response.data,
+              page: Number(response.page),
+              totalPages: Number(response.total_pages),
+            }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        setLoading(false);
       }
     } else {
       if (postsData.page < postsData.totalPages) {
-        setpostsData((prev) => ({ ...prev, page: prev.page + number }));
+        setLoading(true);
+        try {
+          const response = await fetchPosts(postsData.page + number, search);
+          if (response) {
+            setpostsData((prev) => ({
+              ...prev,
+              data: response.data,
+              page: Number(response.page),
+              totalPages: Number(response.total_pages),
+            }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        setLoading(false);
       }
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const response = await fetchPosts(postsData.page, search);
-        if (response) {
-          setpostsData((prev) => ({
-            ...prev,
-            data: response.data,
-            page: Number(response.page),
-            totalPages: Number(response.total_pages),
-          }));
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      setLoading(false);
-    })();
-  }, [postsData.page]);
-
-  useEffect(() => {
-    if (!search) {
-      (async () => {
-        const response = await fetchPosts();
-        if (response) {
-          setpostsData((prev) => ({
-            ...prev,
-            data: response.data,
-            page: Number(response.page),
-            totalPages: Number(response.total_pages),
-          }));
-        }
-      })();
-    }
-  }, [search]);
 
   if (!postsData.data.length && !search && !isLoading)
     return (
@@ -212,7 +223,9 @@ export default function AdminPostsPage() {
               {postsData.page - 1}
             </button>
           )}
-          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">{postsData.page}</p>
+          <p className="font-bold py-2 px-3 rounded bg-arsenic text-white dark:bg-white dark:text-black">
+            {postsData.page}
+          </p>
           {postsData.page + 1 <= postsData.totalPages && (
             <button
               onClick={() => handlePage(1)}

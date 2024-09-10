@@ -50,8 +50,10 @@ import { loader as editPostLoader } from "./routes/edit_posts/loader";
 import { loader as bookmarksLoader } from "./routes/my_bookmarks/loader";
 import { loader as searchLoader } from "./routes/search/loader";
 import { loader as tagDataLoader } from "./routes/tag/loader";
+import { loader as tagsDataLoader } from "./routes/admin_tags/loader";
 import { loader as editTagDataLoader } from "./routes/edit_tag/loader";
 import { loader as userDataLoader } from "./routes/user/loader";
+import { loader as usersDataLoader } from "./routes/admin_users/loader";
 // actions
 import { action as DeletePost } from "./routes/delete_post/action";
 
@@ -239,14 +241,14 @@ const router = createBrowserRouter(
           loader={PostLoader}
         />
         <Route path="admin" element={<AdminDashboard />}>
-          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="users" element={<AdminUsersPage />} loader={usersDataLoader} />
           <Route
             path="users/:id"
             element={<UserPage />}
             loader={userDataLoader}
           />
           <Route path="articles" element={<AdminPostsPage />} />
-          <Route path="tags" element={<AdminTagsPage />} />
+          <Route path="tags" element={<AdminTagsPage />} loader={tagsDataLoader} />
           <Route path="tags/:id" element={<TagPage />} loader={tagDataLoader} />
           <Route
             path="tags/:id/edit"

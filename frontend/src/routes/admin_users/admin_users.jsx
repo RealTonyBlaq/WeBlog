@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { fetchUsers } from "../../api/users";
 import UserCard from "../../ui/user-card";
 import { useOutsideClick } from "../../lib/useOutsideClick";
@@ -6,7 +6,9 @@ import UserCardSkeleton from "../../ui/skeletons/user-card-skeleton";
 import { useLoaderData } from "react-router-dom";
 
 export default function AdminUsersPage() {
-  const { data: { users, page, total_pages} } = useLoaderData();
+  const {
+    data: { users, page, total_pages },
+  } = useLoaderData();
   const [usersData, setusersData] = useState({
     data: users,
     page: Number(page),
@@ -19,7 +21,25 @@ export default function AdminUsersPage() {
 
   const searchByList = ["id", "name", "email"];
 
-  const handleChange = (e) => setSearch(e.target.value);
+  const hasSearched = useRef(false);
+
+  const handleChange = async (e) => {
+    setSearch(e.target.value);
+    // if search is true but the input element is empty,
+    // trigger a fetch if the user had made a search
+    if (search && e.target.value === "" && hasSearched.current) {
+      hasSearched.current = false;
+      const response = await fetchUsers(1, "", searchBy);
+      if (response) {
+        setusersData((prev) => ({
+          ...prev,
+          data: response.data.users,
+          page: Number(response.data.page),
+          totalPages: Number(response.data.total_pages),
+        }));
+      }
+    }
+  };
 
   const handleSearchByChange = (value) => setSearchBy(value);
 
@@ -29,10 +49,12 @@ export default function AdminUsersPage() {
     try {
       const response = await fetchUsers(1, search, searchBy);
       if (response) {
+        hasSearched.current = true;
         setusersData((prev) => ({
           ...prev,
           data: response.data.users,
-          totalPages: response.data.total_pages,
+          page: Number(response.data.page),
+          totalPages: Number(response.data.total_pages),
         }));
       }
     } catch (e) {

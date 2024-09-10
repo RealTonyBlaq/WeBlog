@@ -29,10 +29,10 @@ export default function UserPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    hasSearched.current = true
     try {
       const response = await fetchUserPosts(user.id, 1, search);
       if (response) {
+        hasSearched.current = true
         // console.log(response.data);
         setPosts(response.data);
       }

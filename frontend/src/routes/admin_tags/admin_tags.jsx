@@ -1,20 +1,39 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
+import { Link, useLoaderData } from "react-router-dom";
 import TagButton from "../../ui/tag-button";
 import { deleteTag, fetchTags } from "../../api/tags";
 import toast from "react-hot-toast";
 import TagButtonSkeleton from "../../ui/skeletons/tag-button-skeleton";
 
 export default function AdminTagsPage() {
+  const { data: { tags, page, total_pages } } = useLoaderData()
   const [tagsData, setTagsData] = useState({
-    data: [],
-    page: 1,
-    totalPages: 1,
+    data: tags,
+    page: Number(page),
+    totalPages: Number(total_pages),
   });
   const [search, setSearch] = useState("");
   const [isLoading, setLoading] = useState(false);
 
-  const handleChange = (e) => setSearch(e.target.value);
+  const hasSearched = useRef(false)
+
+  const handleChange = async(e) => {
+    setSearch(e.target.value);
+    // if search is true but the input element is empty,
+    // trigger a fetch if the user had made a search
+    if (search && e.target.value === "" && hasSearched.current) {
+      hasSearched.current = false
+      const response = await fetchTags();
+      if (response) {
+        setTagsData((prev) => ({
+          ...prev,
+          data: response.data.tags,
+          page: Number(response.data.page),
+          totalPages: Number(response.data.total_pages),
+        }));
+      }
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,10 +41,12 @@ export default function AdminTagsPage() {
     try {
       const response = await fetchTags(1, search);
       if (response) {
+        hasSearched.current = true
         setTagsData((prev) => ({
           ...prev,
           data: response.data.tags,
-          totalPages: response.data.total_pages,
+          page: Number(response.data.page),
+          totalPages: Number(response.data.total_pages),
         }));
       }
     } catch (e) {
@@ -47,23 +68,12 @@ export default function AdminTagsPage() {
     }
   };
 
-  const handlePage = (number) => {
+  const handlePage = async(number) => {
     if (number < 0) {
       if (tagsData.page + number >= 1) {
-        setTagsData((prev) => ({ ...prev, page: prev.page + number }));
-      }
-    } else {
-      if (tagsData.page < tagsData.totalPages) {
-        setTagsData((prev) => ({ ...prev, page: prev.page + number }));
-      }
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
+        setLoading(true);
       try {
-        const response = await fetchTags(tagsData.page, search);
+        const response = await fetchTags(tagsData.page + number, search);
         if (response) {
           setTagsData((prev) => ({
             ...prev,
@@ -76,8 +86,27 @@ export default function AdminTagsPage() {
         console.error(e);
       }
       setLoading(false);
-    })();
-  }, [tagsData.page]);
+      }
+    } else {
+      if (tagsData.page < tagsData.totalPages) {
+        setLoading(true);
+      try {
+        const response = await fetchTags(tagsData.page + number, search);
+        if (response) {
+          setTagsData((prev) => ({
+            ...prev,
+            data: response.data.tags,
+            page: Number(response.data.page),
+            totalPages: Number(response.data.total_pages),
+          }));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      setLoading(false);
+      }
+    }
+  };
 
   if (!tagsData.data.length)
     return (

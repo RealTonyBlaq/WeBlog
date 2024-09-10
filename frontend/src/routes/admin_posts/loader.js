@@ -1,7 +1,7 @@
-import { fetchUsers } from "../../api/users";
+import { fetchPosts } from "../../api/posts";
 
 export async function loader() {
-  const { data } = await fetchUsers();
+  const { data, page, total_pages } = await fetchPosts();
 
-  return { data };
+  return { data, page, total_pages };
 }
