@@ -179,7 +179,6 @@ def login():
 def logout():
     """Logs out a user from the session"""
     if not current_user.is_authenticated:
-        flash('User not logged in', 'Not logged in')
         return jsonify({'message': 'User not logged in'}), 401
 
     current_user.is_logged_in = False

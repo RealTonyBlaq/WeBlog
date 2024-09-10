@@ -26,7 +26,7 @@ export default function SearchBar() {
         onClick={handleSubmit}
         aria-label="search button"
         type="submit"
-        className="absolute top-1 sm:top-0 right-0 py-2 pr-4 text-lg text-arsenic dark:text-white"
+        className="absolute top-1 sm:top-0 right-0 py-1 md:py-2 pr-2 md:pr-4 text-lg text-arsenic dark:text-white"
       >
         <span className="icon-[material-symbols--search]"></span>
       </button>

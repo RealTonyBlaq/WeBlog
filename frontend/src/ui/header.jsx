@@ -33,9 +33,9 @@ export default function Header() {
 
   const openUserMenu = () => setUserMenu(true);
   const closeUserMenu = (e) => {
-    if (e) e.stopPropagation()
+    if (e) e.stopPropagation();
     setUserMenu(false);
-  }
+  };
 
   const ref = useOutsideClick(closeUserMenu);
 
@@ -87,33 +87,64 @@ export default function Header() {
           <span className="icon-[material-symbols--close]"></span>
         </button>
         {/* WeBlog Menu */}
-        <div className="w-full px-4 py-12 ">
+        <div className="w-full px-4 py-12" onClick={handleToggleMenu}>
           <SearchBar />
-          {user ? (
-          <>
+          <div className="w-full flex flex-col items-center justify-center gap-2 py-8">
             <Link
-              to={"/dashboard/create_post"}
-              className="hidden lg:block px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
+              to={"/"}
+              className="flex items-center gap-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
             >
-              Create Post
+              <span className="icon-[material-symbols--home]"></span>Home
             </Link>
-          </>
-        ) : (
-          <>
-            <Link
-              to={"/signup"}
-              className="hidden lg:block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
-            >
-              Signup
-            </Link>
-            <Link
-              to={"/login"}
-              className="hidden lg:block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic transition-colors duration-200 ease-in-out font-medium rounded-xl border border-arsenic"
-            >
-              Login
-            </Link>
-          </>
-        )}
+            {user ? (
+              <>
+                <Link
+                  to={"/dashboard"}
+                  className="flex items-center gap-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
+                >
+                  <span className="icon-[material-symbols--dashboard]"></span>
+                  Dashboard
+                </Link>
+                <Link
+                  to={"/dashboard/create_post"}
+                  className="flex items-center gap-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
+                >
+                  <span className="icon-[material-symbols--post-add]"></span>
+                  Create Post
+                </Link>
+                <button
+                  onClick={async () => {
+                    const data = await logout();
+                    const response = await data.json();
+                    setMenu(false);
+                    toast(response.message);
+                    setUser(null);
+                    localStorage.removeItem("user");
+                    navigate("/");
+                  }}
+                  className="flex items-center gap-1 p-1 font-medium"
+                >
+                  <span className="icon-[material-symbols--logout]"></span>Log
+                  Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to={"/signup"}
+                  className="block mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
+                >
+                  Signup
+                </Link>
+                <Link
+                  to={"/login"}
+                  className="flex items-center gap-1 mt-1 px-4 py-2 hover:bg-arsenic hover:text-white dark:hover:bg-white dark:hover:text-arsenic font-medium"
+                >
+                  <span className="icon-[material-symbols--login]"></span>Login
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-4">
@@ -152,31 +183,40 @@ export default function Header() {
                   </div>
                   <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
                   <div className="w-full">
-                    <Link to={"/dashboard"} className="block p-1 ">
+                    <Link
+                      to={"/dashboard"}
+                      className="flex items-center gap-1 p-1"
+                    >
+                      <span className="icon-[material-symbols--dashboard]"></span>
                       Dashboard
                     </Link>
-                    <Link to={"/dashboard/create_post"} className="block p-1 ">
+                    <Link
+                      to={"/dashboard/create_post"}
+                      className="flex items-center gap-1 p-1"
+                    >
+                      <span className="icon-[material-symbols--post-add]"></span>
                       Create Post
                     </Link>
-                    <Link to={"/dashboard/my_bookmarks"} className="block p-1 ">
-                      Bookmarks
+                    <Link to={"/dashboard/my_bookmarks"} className="flex items-center gap-1 p-1">
+                    <span className="icon-[material-symbols--bookmarks]"></span>Bookmarks
                     </Link>
                   </div>
                   <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
-                  <div
+                  <button
                     onClick={async () => {
                       const data = await logout();
                       const response = await data.json();
                       setMenu(false);
                       toast(response.message);
                       setUser(null);
-                      localStorage.removeItem('user');
+                      localStorage.removeItem("user");
                       navigate("/");
                     }}
-                    className="block p-1 cursor-pointer"
+                    className="flex items-center gap-1 p-1 font-medium"
                   >
-                    Log Out
-                  </div>
+                    <span className="icon-[material-symbols--logout]"></span>Log
+                    Out
+                  </button>
                 </div>
               ) : null}
             </div>
