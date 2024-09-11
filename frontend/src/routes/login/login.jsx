@@ -11,20 +11,21 @@ import { useAuth } from "../../lib/useAuth";
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useAuth();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const submitFormHandler = async (values) => {
-    setIsLoading(true)
-    const response = await loginWithEmail(values)
-    if (response.status) {
-      toast.success(response.message)
-      setUser(response.user)
-      navigate("/")
+    setIsLoading(true);
+    const response = await loginWithEmail(values);
+    if (response) {
+      toast.success(response.message);
+      setUser(response.user);
+      navigate("/");
     } else {
-      toast.error(response.message)
-      if (response.message === 'Please complete email verification') navigate("/resend_conf_email")
+      toast.error(response.message);
+      if (response.message === "Please complete email verification")
+        navigate("/resend_conf_email");
     }
-    setIsLoading(false)
+    setIsLoading(false);
   };
 
   return (
@@ -50,12 +51,14 @@ export default function Login() {
                 <Form className="w-full mb-4 md:mb-8 max-w-sm mx-auto flex flex-col gap-3 md:gap-4 items-center">
                   <MyTextInput
                     label="Email"
+                    id="email"
                     name="email"
                     type="email"
                     placeholder="oowoga@gmail.com.com"
                   />
                   <MyTextInput
                     label="Password"
+                    id="password"
                     name="password"
                     type="password"
                   />

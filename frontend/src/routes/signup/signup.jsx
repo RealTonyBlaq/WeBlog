@@ -56,29 +56,34 @@ export default function SignUp() {
                 <Form className="w-full max-w-sm mx-auto flex flex-col gap-3 md:gap-4 items-center">
                   <MyTextInput
                     label="First Name"
+                    id="first_name"
                     name="first_name"
                     type="text"
                     placeholder="Bruce"
                   />
                   <MyTextInput
                     label="Last Name"
+                    id="last_name"
                     name="last_name"
                     type="text"
                     placeholder="Wayne"
                   />
                   <MyTextInput
                     label="Email"
+                    id="email"
                     name="email"
                     type="email"
                     placeholder="oowoga@gmail.com.com"
                   />
                   <MyTextInput
                     label="Password"
+                    id="password"
                     name="password"
                     type="password"
                   />
                   <MyTextInput
                     label="Confirm Password"
+                    id="confirm_password"
                     name="confirm_password"
                     type="password"
                   />

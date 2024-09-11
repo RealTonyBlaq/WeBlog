@@ -36,6 +36,7 @@ export default function ResendConfirmationEmail() {
                 <Form className="w-full mb-4 md:mb-8 max-w-xs mx-auto flex flex-col gap-3 md:gap-4 items-center">
                   <MyTextInput
                     label="Email"
+                    id="email"
                     name="email"
                     type="text"
                   />

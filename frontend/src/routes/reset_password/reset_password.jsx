@@ -40,11 +40,13 @@ export default function ResetPassword() {
                 <Form className="w-full mb-4 md:mb-8 max-w-xs mx-auto flex flex-col gap-3 md:gap-4 items-center">
                   <MyTextInput
                     label="Password"
+                    id="password"
                     name="password"
                     type="password"
                   />
                   <MyTextInput
                     label="Confirm Password"
+                    id="confirm_password"
                     name="confirm_password"
                     type="password"
                   />
