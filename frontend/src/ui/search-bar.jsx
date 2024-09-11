@@ -14,8 +14,8 @@ export default function SearchBar() {
   return (
     <form className="relative w-full">
       <input
-        id="search"
-        name="search"
+        id={`search_${Math.floor(100000 * Math.random())}`}
+        name={`search_${Math.floor(100000 * Math.random())}`}
         type="text"
         value={search}
         onChange={handleChange}

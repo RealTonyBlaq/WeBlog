@@ -66,10 +66,7 @@ export default function Header() {
             onClick={handleToggleMenu}
             className="flex items-center justify-center lg:hidden text-3xl"
           >
-            <span
-              aria-hidden
-              className="icon-[ci--hamburger-md]"
-            ></span>
+            <span aria-hidden className="icon-[ci--hamburger-md]"></span>
           </button>
           <Link to={"/"} className="text-2xl md:text-3xl font-bold">
             WeBlog
@@ -89,10 +86,7 @@ export default function Header() {
           onClick={handleToggleMenu}
           className="absolute top-0 right-0 p-4 flex items-center justify-center lg:hidden text-3xl"
         >
-          <span
-            aria-hidden
-            className="icon-[material-symbols--close]"
-          ></span>
+          <span aria-hidden className="icon-[material-symbols--close]"></span>
         </button>
         {/* WeBlog Menu */}
         <div className="w-full px-4 py-12" onClick={handleToggleMenu}>
@@ -127,15 +121,16 @@ export default function Header() {
                   Create Post
                 </Link>
                 <button
-                  onClick={async () => {
-                    const data = await logout();
-                    const response = await data.json();
-                    setMenu(false);
-                    toast(response.message);
+                 onClick={async () => {
+                  setMenu(false);
+                  const response = await logout();
+                  if (response) {
+                    toast.success(response.message);
                     setUser(null);
                     localStorage.removeItem("user");
                     navigate("/");
-                  }}
+                  }
+                }}
                   className="flex items-center gap-1 p-1 font-medium"
                 >
                   <span className="icon-[material-symbols--logout]"></span>Log
@@ -240,13 +235,14 @@ export default function Header() {
                   <div className="w-full h-[2px] bg-arsenic/50 dark:bg-white/50"></div>
                   <button
                     onClick={async () => {
-                      const data = await logout();
-                      const response = await data.json();
                       setMenu(false);
-                      toast(response.message);
-                      setUser(null);
-                      localStorage.removeItem("user");
-                      navigate("/");
+                      const response = await logout();
+                      if (response) {
+                        toast.success(response.message);
+                        setUser(null);
+                        localStorage.removeItem("user");
+                        navigate("/");
+                      }
                     }}
                     className="flex items-center gap-1 p-1 font-medium"
                   >
