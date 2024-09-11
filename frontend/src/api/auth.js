@@ -10,19 +10,13 @@ import errorHandler from "../lib/errorHandler";
 
 export const baseURL = import.meta.env.VITE_BASE_URL;
 
-const postFetch = async (fetchURL, payload) =>
-  await fetch(`${baseURL + fetchURL}`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
-
 export const getProfile = async () => {
-  const { data } = await Axios.get("/api/v1/me");
-  return data;
+  try {
+    const { data } = await Axios.get("/api/v1/me");
+    return data;
+  } catch (e) {
+    errorHandler(e);
+  }
 };
 
 export const updateProfile = async (payload) => {
@@ -35,31 +29,26 @@ export const updateProfile = async (payload) => {
 };
 
 const signup = async (payload) => {
-  const data = await fetch(`${baseURL}/api/v1/signup`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
-  return await data.json();
+  const { data } = await Axios.post(`/api/v1/signup`, payload);
+  return data;
 };
 
 export const loginWithEmail = async (payload) => {
-  const data = await postFetch("/api/v1/login", payload);
-  const response = await data.json();
-  if (data.ok)
-    return { status: data.ok, message: response.message, user: response.user };
-  return { status: data.ok, message: response.message };
+  try {
+    const { data } = await Axios.post("/api/v1/login", payload);
+    return data;
+  } catch (e) {
+    errorHandler(e);
+  }
 };
 
 export const logout = async () => {
-  const data = await fetch(`${baseURL}/api/v1/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
-  return data;
+  try {
+    const { data } = await Axios.post(`/api/v1/logout`);
+    return data;
+  } catch (e) {
+    errorHandler(e);
+  }
 };
 
 const forgotPassword = async (email) => {
@@ -71,7 +60,7 @@ const forgotPassword = async (email) => {
 const resetPassword = async (payload) => {
   // remove initial section of current url (http://localhost:5000) and append
   // to /api/v1/ to get reset rpassword route
-  
+
   const { data } = await Axios.post(`/api/v1/${payload.url.slice(21)}`, {
     password: payload.password,
     confirm_password: payload.confirm_password,

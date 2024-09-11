@@ -1,6 +1,5 @@
 import toast from "react-hot-toast";
-
-const baseURL = import.meta.env.VITE_BASE_URL;
+import { Axios } from "../lib/axios";
 
 export const handleImageUpload = async (type, file) => {    
   if (file) {
@@ -9,12 +8,11 @@ export const handleImageUpload = async (type, file) => {
     formData.append("file", file);
 
     try {
-      const result = await fetch(`${baseURL}/api/v1/image_uploads/${type}`, {
-        method: "POST",
-        body: formData,
+      const { data } = await Axios.post(`/api/v1/image_uploads/${type}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
-
-      const data = await result.json();
       toast.success(data.message)
       return data
     } catch (error) {
