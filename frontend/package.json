@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp email_confirmation.html dist",
+    "build": "vite build && cp email_confirmation.html dist && mkdir dist/assets/avatars dist/assets/headers",
     "lint": "eslint .",
     "preview": "vite preview"
   },
