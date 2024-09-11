@@ -1,5 +1,5 @@
 """Defines the Comment routes"""
-from api.v1.views import app_views
+from api.v1.views import app_views, required_params
 from flask import jsonify, request
 from flask_login import login_required, current_user
 from models.comment import Comment
@@ -171,18 +171,21 @@ def comments_replies(comment_id):
 @app_views.route('/posts/<post_id>/comments/<comment_id>',
                  methods=['PATCH', 'DELETE'], strict_slashes=False)
 @login_required
+@required_params(
+    required={
+        'content':"Comment must have content."
+    },
+    validations=[
+        ('content', 'Comment must have at least 8 characters',
+         lambda content: len(content) >= 8)
+    ]
+)
 def modify_comments(post_id, comment_id=None):
     """ creates and modifies a comment """
     user_id = current_user.get_id()
 
     if request.method == 'POST':
-        if not request.is_json:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-
-        try:
-            data = request.get_json()
-        except BadRequest:
-            return jsonify({'message': 'Not a valid JSON'}), 400
+        data = request.get_json()
 
         if not data:
             return jsonify({'message': 'Empty dataset'}), 400

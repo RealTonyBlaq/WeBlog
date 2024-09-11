@@ -1,5 +1,5 @@
 """Defines the Me (User) routes"""
-from api.v1.views import app_views
+from api.v1.views import app_views, required_params
 from bcrypt import gensalt, hashpw
 from flask import jsonify, request
 from flask_login import login_required, current_user, login_fresh
@@ -124,6 +124,13 @@ def profile():
 @app_views.route('/my_posts/<post_id>',
                  methods=['GET', 'PATCH', 'DELETE'], strict_slashes=False)
 @login_required
+@required_params(
+    required={
+        "title": "Post must have a title",
+        "body": "Post must have a body",
+    },
+    validations=[]
+)
 def my_posts(post_id=None):
     """
     **API endpoint for a user's published articles**

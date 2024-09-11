@@ -1,5 +1,5 @@
 """Defines the Tag routes"""
-from api.v1.views import app_views, admin_required
+from api.v1.views import app_views, admin_required, required_params, verify_tag_available
 from flask import jsonify, request
 from flask_login import login_required
 from models.tag import Tag
@@ -133,6 +133,15 @@ def tag_posts(tag_id=None):
                  methods=["GET", "PATCH", "DELETE"], strict_slashes=False)
 @login_required
 @admin_required
+@required_params(
+    required={
+        'name':"Tag must have a name."
+    },
+    validations=[
+        ('tag', 'Tag already exists',
+         verify_tag_available)
+    ]
+)
 def tags(tag_id=None):
     """
     POST - creates a tag
@@ -144,33 +153,15 @@ def tags(tag_id=None):
     ]
 
     if request.method == "POST":
-        if not request.is_json:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-
-        try:
-            data = request.get_json()
-        except BadRequest:
-            return jsonify({'message': 'Not a valid JSON'}), 400
-
-        if not data:
-            return jsonify({'message': 'Empty dataset'}), 400
+        data = request.get_json()
 
         # check that all required attributes are present
         name = data.get('name').strip().lower()
 
-        if not name:
-            return jsonify({'message': 'Missing name'}), 400
-
-        # check that tag does not exist already
-        existing_tag = db.query(Tag).filter(Tag.name == name).first()
-        if existing_tag:
-            return jsonify({'message': 'Tag already exists'}), 400
-
         # create tag
         tag = Tag(name=name)
         try:
-            db.add(tag)
-            db.save()
+            tag.save()
         except IntegrityError:
             return jsonify({'message': 'Database integrity error'})
 
