@@ -91,15 +91,15 @@ def close_db(_):
 
 
 @app.errorhandler(400)
-def not_found(_):
+def bad_request(e):
     """Handle the 400 page"""
-    return jsonify({"message": "Bad Request"}), 400
+    return jsonify({"message": f"{e}"}), 400
 
 
 @app.errorhandler(404)
-def not_found(_):
+def not_found(e):
     """Handle the 404 page"""
-    return jsonify({"message": "Not found"}), 404
+    return jsonify({"message": f"{e}"}), 404
 
 
 @app.errorhandler(401)
