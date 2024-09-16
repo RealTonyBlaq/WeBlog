@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from utils import db
 from utils.token import generate_confirmation_token, confirm_token
 from utils.send_email import send_confirmation_email
-from werkzeug.exceptions import BadRequest
+from os import getenv
 import re
 
 
@@ -97,7 +97,8 @@ def signup():
         Best regards,
         The WeBlog Team"""
     subject = "WeBlog - Welcome | Email Confirmation"
-    send_confirmation_email(user.email, subject, content)
+    if getenv('WEBLOG_ENV') != "test":
+        send_confirmation_email(user.email, subject, content)
 
     msg = 'Signup successful, please verify email to proceed.'
     return jsonify({'message': msg}), 201
@@ -245,7 +246,8 @@ def send_password_reset_mail():
         Best regards,
         The WeBlog Team"""
     subject = "WeBlog - Password Reset"
-    send_confirmation_email(user.email, subject, content)
+    if getenv('WEBLOG_ENV') != "test":
+        send_confirmation_email(user.email, subject, content)
 
     msg = 'Link to reset password has been sent to your email.'
     return jsonify({'message': msg}), 200
@@ -311,12 +313,10 @@ def resend_conf_email():
     # get user
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        return jsonify({'message': f'User with email-{email} \
-            not found'}), 404
+        return jsonify({'message': f'User with email-{email} not found'}), 404
 
     if user.is_email_verified:
-        return jsonify({'message': f'User with email-{email} \
-            already verified'}), 401
+        return jsonify({'message': f'User with email-{email} already verified'}), 401
 
     # send user confirmation email
     token = generate_confirmation_token(email)
@@ -351,7 +351,8 @@ def resend_conf_email():
         Best regards,
         The WeBlog Team"""
     subject = "WeBlog - Email Confirmation"
-    send_confirmation_email(user.email, subject, content)
+    if getenv('WEBLOG_ENV') != "test":
+        send_confirmation_email(user.email, subject, content)
 
-    msg = 'Email verification hasb been sent, please verify email to proceed.'
+    msg = 'Email verification has been sent, please verify email to proceed.'
     return jsonify({'message': msg}), 200

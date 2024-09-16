@@ -27,26 +27,18 @@ app.config['REMEMBER_COOKIE_HTTPONLY'] = True,
 # app.config['SESSION_COOKIE_SAMESITE'] = "Strict",
 app.config['ALLOWED_EXTENSIONS'] = ['.png', '.jpg', '.jpeg', '.gif']
 app.config['UPLOAD_FOLDER'] = getenv('UPLOAD_FOLDER')
-# MAIL SERVER CONFIG
-# app.config['MAIL_SERVER'] = 'live.smtp.mailtrap.io'
-# app.config['MAIL_PORT'] = 587
 app.config['MAIL_DEFAULT_SENDER'] = getenv('MAIL_DEFAULT_SENDER')
-# app.config['MAIL_USERNAME'] = getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = getenv('MAIL_PASSWORD')
-# app.config['MAIL_USE_TLS'] = True
-# app.config['MAIL_USE_SSL'] = False
+
 
 login_manager = LoginManager()
 login_manager.init_app(app=app)
 app.register_blueprint(app_views)
 
-# mail = Mail(app=app)
 executor = Executor(app=app)
-
 cors = CORS(app,
             resources={r"/api/v1/*": {"origins": "*"}},
             supports_credentials=True)
-
 csrf = CSRFProtect(app=app)
 
 

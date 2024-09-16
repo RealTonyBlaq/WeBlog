@@ -52,11 +52,11 @@ class Storage:
             # create one
             create_database(self.__engine.url)
 
-        if env == "test":
-            Base.metadata.drop_all(self.__engine)
-
     def reload(self):
         """reloads data from the database"""
+        env = getenv('WEBLOG_ENV')
+        if env == "test":
+            Base.metadata.drop_all(self.__engine)
         Base.metadata.create_all(self.__engine)
         sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Session = scoped_session(sess_factory)

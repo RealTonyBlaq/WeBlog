@@ -65,7 +65,9 @@ def required_params(func=None, required={}, validations=[]):
                     return jsonify({'message': ', '.join(errors)}), 422
             except Exception:
                 return jsonify({'message': 'Internal Server Error, try again later.'}), 500
-        return func(*args, **kwargs)
+        if kwargs:
+            return func(**kwargs)
+        return func()
     return decorator
 
 
