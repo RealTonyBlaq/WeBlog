@@ -40,7 +40,7 @@ export default function DisplayPosts({ posts, fetchData }) {
         </div>
       }
     >
-      <div className="w-full grid gap-3 md:gap-4 xl:gap-6">
+      <div className="w-full max-w-3xl mx-auto grid gap-3 md:gap-4 xl:gap-6">
         {displayedPosts.map((post) => (
           <PostCard
             key={post.id}

@@ -216,11 +216,12 @@ export default function EditPost({ post, tags }) {
                 </label>
               </div>
             </div>
-            {header_url ? (
+            {header_url && (
               <p className="mb-2 md:mb-4 font-medium">
                 HEADER_URL: {baseURL + "/" + header_url}
               </p>
-            ) : file && file.size < 1048576 ? (
+            )}
+            { file && file.size < 1048576 ? (
               <section className="w-full mb-2 md:mb-4">
                 File details:
                 <ul className="flex items-center gap-2">
@@ -239,6 +240,7 @@ export default function EditPost({ post, tags }) {
                     const data = await handleImageUpload("headers", file);
                     if (data) {
                       setHeaderUrl(data.url);
+                      setFile(null)
                     }
                   }}
                   type="button"

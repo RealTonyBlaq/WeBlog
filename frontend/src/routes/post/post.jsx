@@ -155,7 +155,7 @@ const RenderPostMarkDown = () => {
       <section className="w-full max-w-3xl mx-auto p-4 md:p-8 lg:p-10 xl:p-12 bg-white dark:bg-dark-navy-blue text-arsenic dark:text-white rounded-md shadow">
         {post.header_url && (
           <img
-            src={post.header_url}
+            src={`/${post.header_url}`}
             alt="header image"
             className="w-full h-full max-h-96"
           />

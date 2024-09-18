@@ -3,7 +3,7 @@ export default function Avatar({ author }) {
     <div className="">
       {author.avatar_url ? (
         <img
-          src={author.avatar_url}
+          src={`/${author.avatar_url}`}
           alt="user avatar"
           className="w-10 md:w-12 h-10 md:h-12 rounded-full cursor-pointer"
         />

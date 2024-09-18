@@ -25,8 +25,18 @@
 }
 
 .post_markdown h1 {
-  @apply mb-4 text-3xl md:text-4xl xl:text-5xl font-bold
+  @apply my-4 md:mb-8 text-3xl md:text-4xl xl:text-5xl font-bold
 }
+.post_markdown h2 {
+  @apply my-3 md:mb-6 text-xl md:text-2xl xl:text-3xl font-semibold
+}
+.post_markdown h3 {
+  @apply my-2 md:mb-4 text-lg md:text-xl xl:text-2xl font-semibold
+}
+.post_markdown h4 {
+  @apply my-1 md:mb-2 md:text-lg xl:text-xl font-medium
+}
+
 
 .post_markdown p {
   @apply mb-4 md:mb-8 xl:mb-12
