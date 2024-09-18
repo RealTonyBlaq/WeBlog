@@ -52,7 +52,7 @@ email = 'jackryan@example.com'
 password = 'password123'
 
 user_1 = User(
-    first_name=first_name, last_name=first_name,
+    first_name=first_name, last_name=last_name,
     email=email, password=password
 )
 
@@ -71,7 +71,7 @@ email = 'johndoe@example.com'
 password = 'password123'
 
 user_2 = User(
-    first_name=first_name, last_name=first_name,
+    first_name=first_name, last_name=last_name,
     email=email, password=password
 )
 
@@ -87,7 +87,7 @@ email = 'clarkdoe@example.com'
 password = 'password123'
 
 user_3 = User(
-    first_name=first_name, last_name=first_name,
+    first_name=first_name, last_name=last_name,
     email=email, password=password
 )
 
@@ -103,7 +103,7 @@ email = 'janedoe@example.com'
 password = 'password123'
 
 user_4 = User(
-    first_name=first_name, last_name=first_name,
+    first_name=first_name, last_name=last_name,
     email=email, password=password
 )
 
