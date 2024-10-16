@@ -44,7 +44,7 @@ class TestPostClassDocs(unittest.TestCase):
                         "Post Class needs a docstring")
 
     def test_func_docstrings(self):
-        """Test for the presence of docstrings in Post class methods"""
+        """Test for the presence of docstrings in the Post class methods"""
         for func in self.base_funcs:
             with self.subTest(function=func):
                 self.assertIsNot(
