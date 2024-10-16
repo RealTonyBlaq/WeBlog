@@ -32,19 +32,19 @@ class TestPostClassDocs(unittest.TestCase):
     def test_module_docstring(self):
         """Test for the existence of module docstring"""
         self.assertIsNot(module_doc, None,
-                         ".py needs a docstring")
+                         "Post.py needs a docstring")
         self.assertTrue(len(module_doc) > 1,
-                        "base.py needs a docstring")
+                        "Post.py needs a docstring")
 
     def test_class_docstring(self):
-        """Test for the BaseModel class docstring"""
+        """Test for the Post Model class docstring"""
         self.assertIsNot(Post.__doc__, None,
-                         "BaseClass needs a docstring")
+                         "Post Class needs a docstring")
         self.assertTrue(len(Post.__doc__) >= 1,
-                        "BaseClass needs a docstring")
+                        "Post Class needs a docstring")
 
     def test_func_docstrings(self):
-        """Test for the presence of docstrings in  methods"""
+        """Test for the presence of docstrings in Post class methods"""
         for func in self.base_funcs:
             with self.subTest(function=func):
                 self.assertIsNot(
